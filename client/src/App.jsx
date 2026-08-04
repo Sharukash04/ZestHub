@@ -1,15 +1,17 @@
 import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
+import Hero from "./components/Hero/Hero";
 import CategoryCard from "./components/CategoryCard";
 
 function App() {
   return (
-    <div>
+    <>
       <Navbar />
-      <Hero />
 
-      <CategoryCard />
-    </div>
+      <main>
+        <Hero />
+        <CategoryCard />
+      </main>
+    </>
   );
 }
 
