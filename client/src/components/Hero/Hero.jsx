@@ -1,6 +1,6 @@
 import "./Hero.css";
-import heroFood from "../../assets/images/hero-food.jpg";
-import { FaSearch, FaMapMarkerAlt, FaStar, FaUtensils } from "react-icons/fa";
+import heroImage from "../../assets/images/hero-food.jpg";
+import { FaSearch, FaStar, FaMapMarkerAlt, FaStore } from "react-icons/fa";
 
 function Hero() {
   return (
@@ -8,26 +8,26 @@ function Hero() {
 
       <div className="hero-content">
 
-        <span className="hero-tag">
-          🍽️ Discover Amazing Food
+        <span className="hero-badge">
+          🍽️ Restaurant Discovery Platform
         </span>
 
         <h1>
-          Discover Your Next
-          <span> Favorite Meal</span>
+          Discover Your Perfect
+          <span> Dining Experience</span>
         </h1>
 
         <p>
-          Explore top-rated restaurants, cafés, and hidden food gems.
-          Read trusted reviews and find your perfect dining experience
-          with ZestHub.
+          Explore restaurants, cafés, and hidden food gems.
+          Read trusted reviews and discover places you'll love.
         </p>
 
-        <div className="search-box">
+
+        <div className="search-container">
 
           <input
             type="text"
-            placeholder="Discover Your Perfect Dining Experience"
+            placeholder="Search restaurants, cuisines or locations..."
           />
 
           <button>
@@ -36,56 +36,49 @@ function Hero() {
 
         </div>
 
-        <div className="hero-buttons">
 
-          <button className="primary-btn">
-            Explore Restaurants
-          </button>
+        <button className="explore-btn">
+          Start Exploring
+        </button>
 
-          <button className="secondary-btn">
-            Learn More
-          </button>
 
-        </div>
+        <div className="stats">
 
-        <div className="hero-stats">
-
-          <div className="stat">
-            <FaUtensils />
-            <div>
-              <h3>500+</h3>
-              <p>Restaurants</p>
-            </div>
+          <div>
+            <FaStore />
+            <h3>500+</h3>
+            <p>Restaurants</p>
           </div>
 
-          <div className="stat">
+
+          <div>
             <FaStar />
-            <div>
-              <h3>10K+</h3>
-              <p>Reviews</p>
-            </div>
+            <h3>15K+</h3>
+            <p>Reviews</p>
           </div>
 
-          <div className="stat">
+
+          <div>
             <FaMapMarkerAlt />
-            <div>
-              <h3>20+</h3>
-              <p>Locations</p>
-            </div>
+            <h3>20+</h3>
+            <p>Cities</p>
           </div>
 
         </div>
+
 
       </div>
+
 
       <div className="hero-image">
 
         <img
-          src={heroFood}
-          alt="Delicious Food"
+          src={heroImage}
+          alt="Restaurant food"
         />
 
       </div>
+
 
     </section>
   );
