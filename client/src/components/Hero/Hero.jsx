@@ -27,7 +27,7 @@ function Hero() {
 
           <input
             type="text"
-            placeholder="Search restaurants or cuisines..."
+            placeholder="Discover Your Perfect Dining Experience"
           />
 
           <button>
