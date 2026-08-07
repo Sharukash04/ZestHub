@@ -1,0 +1,135 @@
+.restaurants-page {
+  padding: 60px 8%;
+  background: #fff8f5;
+  min-height: 100vh;
+}
+
+.restaurants-header {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.restaurants-header h1 {
+  font-size: 42px;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.restaurants-header p {
+  color: #6b7280;
+  font-size: 17px;
+}
+
+.restaurant-search {
+  display: flex;
+  max-width: 700px;
+  margin: 0 auto 25px;
+  background: white;
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.restaurant-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 14px;
+  font-size: 16px;
+}
+
+.restaurant-search button {
+  border: none;
+  background: #ff6b35;
+  color: white;
+  padding: 0 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.restaurant-filters {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.restaurant-filters button {
+  border: 1px solid #ff6b35;
+  background: white;
+  color: #ff6b35;
+  padding: 10px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.restaurant-filters button:hover {
+  background: #ff6b35;
+  color: white;
+}
+
+.restaurants-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+}
+
+.listing-card {
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  transition: 0.3s;
+}
+
+.listing-card:hover {
+  transform: translateY(-7px);
+}
+
+.listing-image {
+  height: 190px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffe8de;
+  font-size: 60px;
+}
+
+.listing-info {
+  padding: 20px;
+}
+
+.listing-info h2 {
+  font-size: 21px;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.listing-rating {
+  display: inline-block;
+  background: #fff1d6;
+  color: #ff6b35;
+  padding: 6px 10px;
+  border-radius: 15px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.listing-info p {
+  color: #6b7280;
+  margin: 7px 0;
+}
+
+.details-button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 11px;
+  border: none;
+  border-radius: 9px;
+  background: #ff6b35;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}

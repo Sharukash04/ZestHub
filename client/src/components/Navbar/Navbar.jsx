@@ -1,24 +1,46 @@
 import "./Navbar.css";
-import { FaUtensils } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 function Navbar() {
   return (
     <nav className="navbar">
-      <div className="logo">
-        <FaUtensils className="logo-icon" />
-        <h2>ZestHub</h2>
+
+      <div className="navbar-logo">
+        <Link to="/">
+          🍽️ ZestHub
+        </Link>
       </div>
 
-      <ul className="nav-links">
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Restaurants</a></li>
-        <li><a href="#">Favorites</a></li>
-      </ul>
 
-      <div className="nav-buttons">
-        <button className="login-btn">Login</button>
-        <button className="register-btn">Register</button>
+      <div className="navbar-links">
+
+        <Link to="/">
+          Home
+        </Link>
+
+        <Link to="/restaurants">
+          Restaurants
+        </Link>
+
+        <Link to="/#community">
+          Community
+        </Link>
+
+        <Link to="/#about">
+          About
+        </Link>
+
       </div>
+
+
+      <div className="navbar-actions">
+
+        <Link to="/login" className="login-button">
+          Login
+        </Link>
+
+      </div>
+
     </nav>
   );
 }

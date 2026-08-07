@@ -1,3 +1,5 @@
+import { Routes, Route } from "react-router-dom";
+
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero/Hero";
 import Categories from "./components/Categories";
@@ -8,19 +10,29 @@ import CommunityPreview from "./components/CommunityPreview";
 import Newsletter from "./components/Newsletter";
 import Footer from "./components/Footer";
 
-function App() {
+import Restaurants from "./pages/Restaurants";
+import "./pages/Home.css";
+
+
+function Home() {
   return (
     <>
-      <Navbar />
+      <main className="home">
 
-      <main>
         <Hero />
+
         <Categories />
+
         <FeaturedRestaurants />
+
         <TrendingRestaurants />
+
         <WhyChooseUs />
+
         <CommunityPreview />
+
         <Newsletter />
+
       </main>
 
       <Footer />
@@ -28,4 +40,43 @@ function App() {
   );
 }
 
-export default App;  
+
+
+function RestaurantPage() {
+  return (
+    <>
+      <Restaurants />
+
+      <Footer />
+    </>
+  );
+}
+
+
+
+function App() {
+
+  return (
+
+    <Routes>
+
+      <Route
+        path="/"
+        element={<Home />}
+      />
+
+
+      <Route
+        path="/restaurants"
+        element={<RestaurantPage />}
+      />
+
+
+    </Routes>
+
+  );
+
+}
+
+
+export default App;
