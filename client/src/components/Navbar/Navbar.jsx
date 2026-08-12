@@ -5,14 +5,13 @@ function Navbar() {
   return (
     <nav className="navbar">
 
-      <div className="navbar-logo">
+      <div className="logo">
         <Link to="/">
-          🍽️ ZestHub
+          ZestHub
         </Link>
       </div>
 
-
-      <div className="navbar-links">
+      <div className="menu">
 
         <Link to="/">
           Home
@@ -22,20 +21,11 @@ function Navbar() {
           Restaurants
         </Link>
 
-        <Link to="/#community">
-          Community
-        </Link>
-
-        <Link to="/#about">
+        <Link to="/about">
           About
         </Link>
 
-      </div>
-
-
-      <div className="navbar-actions">
-
-        <Link to="/login" className="login-button">
+        <Link to="/login">
           Login
         </Link>
 
