@@ -1,15 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-
-
-router = APIRouter(
+router =APIRouter(
     prefix="/api/restaurants",
     tags=["Restaurants"]
 )
-
-
 # Temporary restaurant storage
-restaurants = [
+restaurants=[
     {
         "id": 1,
         "name": "Spice Garden",
@@ -35,8 +31,6 @@ restaurants = [
         "image": "restaurant3.jpg"
     }
 ]
-
-
 # Data format for creating a restaurant
 class RestaurantCreate(BaseModel):
     name: str
@@ -44,35 +38,29 @@ class RestaurantCreate(BaseModel):
     cuisine: str
     rating: float
     image: str
-
-
 # GET all restaurants
 @router.get("/")
 def get_restaurants():
     return restaurants
-
-
 # GET restaurant by ID
 @router.get("/{restaurant_id}")
 def get_restaurant(restaurant_id: int):
 
     for restaurant in restaurants:
-        if restaurant["id"] == restaurant_id:
+        if restaurant["id"]==restaurant_id:
             return restaurant
 
     raise HTTPException(
         status_code=404,
         detail="Restaurant not found"
     )
-
-
 # POST create restaurant
 @router.post("/")
 def create_restaurant(restaurant: RestaurantCreate):
 
     new_id = max([r["id"] for r in restaurants], default=0) + 1
 
-    new_restaurant = {
+    new_restaurant={
         "id": new_id,
         "name": restaurant.name,
         "location": restaurant.location,
@@ -98,7 +86,7 @@ def update_restaurant(
 
     for index, existing in enumerate(restaurants):
 
-        if existing["id"] == restaurant_id:
+        if existing["id"]==restaurant_id:
 
             updated_restaurant = {
                 "id": restaurant_id,
@@ -109,7 +97,7 @@ def update_restaurant(
                 "image": restaurant.image
             }
 
-            restaurants[index] = updated_restaurant
+            restaurants[index]=updated_restaurant
 
             return {
                 "message": "Restaurant updated successfully",
@@ -128,7 +116,7 @@ def delete_restaurant(restaurant_id: int):
 
     for index, restaurant in enumerate(restaurants):
 
-        if restaurant["id"] == restaurant_id:
+        if restaurant["id"]==restaurant_id:
 
             deleted = restaurants.pop(index)
 

@@ -1,0 +1,15 @@
+Layer	Technology
+Frontend	React.js
+Build Tool	Vite
+Routing	React Router
+UI Icons	React Icons
+Styling	CSS3
+Backend	Python
+Backend Framework	FastAPI
+API Server	Uvicorn
+API Validation	Pydantic
+ORM	SQLAlchemy
+Database	PostgreSQL
+API Testing	Swagger UI / FastAPI Docs
+Version Control	Git & GitHub
+Environment Configuration	.env / python-dotenv
