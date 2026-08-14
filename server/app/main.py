@@ -1,6 +1,13 @@
 from fastapi import FastAPI
 
+from app.database import Base, engine
+from app import models
+
 from app.routes.restaurants import router as restaurant_router
+
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI(

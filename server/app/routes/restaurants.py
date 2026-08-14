@@ -1,131 +1,180 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-router =APIRouter(
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models import Restaurant
+
+
+router = APIRouter(
     prefix="/api/restaurants",
     tags=["Restaurants"]
 )
-# Temporary restaurant storage
-restaurants=[
-    {
-        "id": 1,
-        "name": "Spice Garden",
-        "location": "Trichy",
-        "cuisine": "South Indian",
-        "rating": 4.8,
-        "image": "restaurant1.jpg"
-    },
-    {
-        "id": 2,
-        "name": "Urban Cafe",
-        "location": "Chennai",
-        "cuisine": "Cafe & Beverages",
-        "rating": 4.6,
-        "image": "restaurant2.jpg"
-    },
-    {
-        "id": 3,
-        "name": "Royal Biryani House",
-        "location": "Madurai",
-        "cuisine": "Biryani",
-        "rating": 4.9,
-        "image": "restaurant3.jpg"
-    }
-]
-# Data format for creating a restaurant
+
+
+# -----------------------------
+# Request Data
+# -----------------------------
+
 class RestaurantCreate(BaseModel):
-    name: str
-    location: str
-    cuisine: str
-    rating: float
-    image: str
-# GET all restaurants
-@router.get("/")
-def get_restaurants():
-    return restaurants
-# GET restaurant by ID
-@router.get("/{restaurant_id}")
-def get_restaurant(restaurant_id: int):
+    name: str = Field(min_length=2, max_length=150)
+    location: str = Field(min_length=2, max_length=150)
+    cuisine: str = Field(min_length=2, max_length=100)
+    rating: float = Field(default=0.0, ge=0.0, le=5.0)
+    image: str | None = None
 
-    for restaurant in restaurants:
-        if restaurant["id"]==restaurant_id:
-            return restaurant
 
-    raise HTTPException(
-        status_code=404,
-        detail="Restaurant not found"
-    )
-# POST create restaurant
-@router.post("/")
-def create_restaurant(restaurant: RestaurantCreate):
+# -----------------------------
+# Response Helper
+# -----------------------------
 
-    new_id = max([r["id"] for r in restaurants], default=0) + 1
-
-    new_restaurant={
-        "id": new_id,
+def restaurant_response(restaurant):
+    return {
+        "id": restaurant.id,
         "name": restaurant.name,
         "location": restaurant.location,
         "cuisine": restaurant.cuisine,
-        "rating": restaurant.rating,
-        "image": restaurant.image
+        "rating": restaurant.average_rating,
+        "description": restaurant.description,
+        "image": restaurant.image,
+        "category_id": restaurant.category_id
     }
 
-    restaurants.append(new_restaurant)
+
+# -----------------------------
+# GET ALL RESTAURANTS
+# -----------------------------
+
+@router.get("/")
+def get_restaurants(db: Session = Depends(get_db)):
+
+    restaurants = db.query(Restaurant).all()
+
+    return [
+        restaurant_response(restaurant)
+        for restaurant in restaurants
+    ]
+
+
+# -----------------------------
+# GET RESTAURANT BY ID
+# -----------------------------
+
+@router.get("/{restaurant_id}")
+def get_restaurant(
+    restaurant_id: int,
+    db: Session = Depends(get_db)
+):
+
+    restaurant = (
+        db.query(Restaurant)
+        .filter(Restaurant.id == restaurant_id)
+        .first()
+    )
+
+    if restaurant is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Restaurant not found"
+        )
+
+    return restaurant_response(restaurant)
+
+
+# -----------------------------
+# CREATE RESTAURANT
+# -----------------------------
+
+@router.post("/", status_code=201)
+def create_restaurant(
+    restaurant: RestaurantCreate,
+    db: Session = Depends(get_db)
+):
+
+    new_restaurant = Restaurant(
+        name=restaurant.name,
+        location=restaurant.location,
+        cuisine=restaurant.cuisine,
+        average_rating=restaurant.rating,
+        image=restaurant.image
+    )
+
+    db.add(new_restaurant)
+    db.commit()
+    db.refresh(new_restaurant)
 
     return {
         "message": "Restaurant created successfully",
-        "restaurant": new_restaurant
+        "restaurant": restaurant_response(new_restaurant)
     }
 
 
-# PUT update restaurant
+# -----------------------------
+# UPDATE RESTAURANT
+# -----------------------------
+
 @router.put("/{restaurant_id}")
 def update_restaurant(
     restaurant_id: int,
-    restaurant: RestaurantCreate
+    restaurant: RestaurantCreate,
+    db: Session = Depends(get_db)
 ):
 
-    for index, existing in enumerate(restaurants):
-
-        if existing["id"]==restaurant_id:
-
-            updated_restaurant = {
-                "id": restaurant_id,
-                "name": restaurant.name,
-                "location": restaurant.location,
-                "cuisine": restaurant.cuisine,
-                "rating": restaurant.rating,
-                "image": restaurant.image
-            }
-
-            restaurants[index]=updated_restaurant
-
-            return {
-                "message": "Restaurant updated successfully",
-                "restaurant": updated_restaurant
-            }
-
-    raise HTTPException(
-        status_code=404,
-        detail="Restaurant not found"
+    existing_restaurant = (
+        db.query(Restaurant)
+        .filter(Restaurant.id == restaurant_id)
+        .first()
     )
 
+    if existing_restaurant is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Restaurant not found"
+        )
 
-# DELETE restaurant
+    existing_restaurant.name = restaurant.name
+    existing_restaurant.location = restaurant.location
+    existing_restaurant.cuisine = restaurant.cuisine
+    existing_restaurant.average_rating = restaurant.rating
+    existing_restaurant.image = restaurant.image
+
+    db.commit()
+    db.refresh(existing_restaurant)
+
+    return {
+        "message": "Restaurant updated successfully",
+        "restaurant": restaurant_response(existing_restaurant)
+    }
+
+
+# -----------------------------
+# DELETE RESTAURANT
+# -----------------------------
+
 @router.delete("/{restaurant_id}")
-def delete_restaurant(restaurant_id: int):
+def delete_restaurant(
+    restaurant_id: int,
+    db: Session = Depends(get_db)
+):
 
-    for index, restaurant in enumerate(restaurants):
-
-        if restaurant["id"]==restaurant_id:
-
-            deleted = restaurants.pop(index)
-
-            return {
-                "message": "Restaurant deleted successfully",
-                "restaurant": deleted
-            }
-
-    raise HTTPException(
-        status_code=404,
-        detail="Restaurant not found"
+    restaurant = (
+        db.query(Restaurant)
+        .filter(Restaurant.id == restaurant_id)
+        .first()
     )
+
+    if restaurant is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Restaurant not found"
+        )
+
+    deleted_restaurant = restaurant_response(restaurant)
+
+    db.delete(restaurant)
+    db.commit()
+
+    return {
+        "message": "Restaurant deleted successfully",
+        "restaurant": deleted_restaurant
+    }
