@@ -17,11 +17,33 @@ router = APIRouter(
 # -----------------------------
 
 class RestaurantCreate(BaseModel):
-    name: str = Field(min_length=2, max_length=150)
-    location: str = Field(min_length=2, max_length=150)
-    cuisine: str = Field(min_length=2, max_length=100)
-    rating: float = Field(default=0.0, ge=0.0, le=5.0)
+
+    name: str = Field(
+        min_length=2,
+        max_length=150
+    )
+
+    location: str = Field(
+        min_length=2,
+        max_length=150
+    )
+
+    cuisine: str = Field(
+        min_length=2,
+        max_length=100
+    )
+
+    rating: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=5.0
+    )
+
+    description: str | None = None
+
     image: str | None = None
+
+    category_id: int | None = None
 
 
 # -----------------------------
@@ -29,6 +51,7 @@ class RestaurantCreate(BaseModel):
 # -----------------------------
 
 def restaurant_response(restaurant):
+
     return {
         "id": restaurant.id,
         "name": restaurant.name,
@@ -46,9 +69,15 @@ def restaurant_response(restaurant):
 # -----------------------------
 
 @router.get("/")
-def get_restaurants(db: Session = Depends(get_db)):
+def get_restaurants(
+    db: Session = Depends(get_db)
+):
 
-    restaurants = db.query(Restaurant).all()
+    restaurants = (
+        db.query(Restaurant)
+        .order_by(Restaurant.id)
+        .all()
+    )
 
     return [
         restaurant_response(restaurant)
@@ -73,6 +102,7 @@ def get_restaurant(
     )
 
     if restaurant is None:
+
         raise HTTPException(
             status_code=404,
             detail="Restaurant not found"
@@ -92,15 +122,26 @@ def create_restaurant(
 ):
 
     new_restaurant = Restaurant(
+
         name=restaurant.name,
+
         location=restaurant.location,
+
         cuisine=restaurant.cuisine,
+
+        description=restaurant.description,
+
         average_rating=restaurant.rating,
-        image=restaurant.image
+
+        image=restaurant.image,
+
+        category_id=restaurant.category_id
     )
 
     db.add(new_restaurant)
+
     db.commit()
+
     db.refresh(new_restaurant)
 
     return {
@@ -127,18 +168,28 @@ def update_restaurant(
     )
 
     if existing_restaurant is None:
+
         raise HTTPException(
             status_code=404,
             detail="Restaurant not found"
         )
 
     existing_restaurant.name = restaurant.name
+
     existing_restaurant.location = restaurant.location
+
     existing_restaurant.cuisine = restaurant.cuisine
+
+    existing_restaurant.description = restaurant.description
+
     existing_restaurant.average_rating = restaurant.rating
+
     existing_restaurant.image = restaurant.image
 
+    existing_restaurant.category_id = restaurant.category_id
+
     db.commit()
+
     db.refresh(existing_restaurant)
 
     return {
@@ -164,14 +215,18 @@ def delete_restaurant(
     )
 
     if restaurant is None:
+
         raise HTTPException(
             status_code=404,
             detail="Restaurant not found"
         )
 
-    deleted_restaurant = restaurant_response(restaurant)
+    deleted_restaurant = restaurant_response(
+        restaurant
+    )
 
     db.delete(restaurant)
+
     db.commit()
 
     return {

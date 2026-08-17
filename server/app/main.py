@@ -4,10 +4,7 @@ from app.database import Base, engine
 from app import models
 
 from app.routes.restaurants import router as restaurant_router
-
-
-# Create database tables
-Base.metadata.create_all(bind=engine)
+from app.routes.categories import router as category_router
 
 
 app = FastAPI(
@@ -17,7 +14,12 @@ app = FastAPI(
 )
 
 
+# Create database tables
+Base.metadata.create_all(bind=engine)
+
+
 app.include_router(restaurant_router)
+app.include_router(category_router)
 
 
 @app.get("/")
