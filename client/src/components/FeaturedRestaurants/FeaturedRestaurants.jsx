@@ -1,96 +1,111 @@
 import "./FeaturedRestaurants.css";
-
-import restaurant1 from "../../assets/images/restaurant1.jpg";
-import restaurant2 from "../../assets/images/restaurant2.jpg";
-import restaurant3 from "../../assets/images/restaurant3.jpg";
-
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function FeaturedRestaurants() {
   const navigate = useNavigate();
 
-  const restaurants = [
-    {
-      id: 1,
-      name: "Spice Garden",
-      image: restaurant1,
-      rating: "4.8",
-      location: "Trichy",
-      cuisine: "South Indian",
-    },
-    {
-      id: 2,
-      name: "Urban Cafe",
-      image: restaurant2,
-      rating: "4.6",
-      location: "Chennai",
-      cuisine: "Cafe & Beverages",
-    },
-    {
-      id: 3,
-      name: "Royal Biryani House",
-      image: restaurant3,
-      rating: "4.9",
-      location: "Madurai",
-      cuisine: "Biryani",
-    },
-  ];
+  const [restaurants, setRestaurants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/restaurants/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch restaurants");
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        setRestaurants(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Restaurant fetch error:", error);
+        setError("Unable to load restaurants");
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <section className="featured">
 
       <div className="featured-header">
-        <h2>Featured Restaurants</h2>
+
+        <h2>
+          Featured Restaurants
+        </h2>
 
         <p>
           Discover popular restaurants loved by food enthusiasts
         </p>
+
       </div>
 
-      <div className="restaurant-container">
+      {loading && (
+        <p style={{ textAlign: "center" }}>
+          Loading restaurants...
+        </p>
+      )}
 
-        {restaurants.map((restaurant) => (
-          <div
-            className="restaurant-card"
-            key={restaurant.id}
-          >
+      {error && (
+        <p style={{ textAlign: "center", color: "red" }}>
+          {error}
+        </p>
+      )}
 
-            <img
-              src={restaurant.image}
-              alt={restaurant.name}
-            />
+      {!loading && !error && (
+        <div className="restaurant-container">
 
-            <div className="restaurant-info">
+          {restaurants.map((restaurant) => (
 
-              <h3>{restaurant.name}</h3>
+            <div
+              className="restaurant-card"
+              key={restaurant.id}
+            >
 
-              <div className="rating">
-                ⭐ {restaurant.rating}
+              <img
+                src={restaurant.image}
+                alt={restaurant.name}
+              />
+
+              <div className="restaurant-info">
+
+                <h3>
+                  {restaurant.name}
+                </h3>
+
+                <div className="rating">
+                  ⭐ {restaurant.rating}
+                </div>
+
+                <p>
+                  📍 {restaurant.location}
+                </p>
+
+                <p>
+                  🍽️ {restaurant.cuisine}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(`/restaurant/${restaurant.id}`)
+                  }
+                >
+                  View Details
+                </button>
+
               </div>
-
-              <p>
-                📍 {restaurant.location}
-              </p>
-
-              <p>
-                🍽️ {restaurant.cuisine}
-              </p>
-
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(`/restaurant/${restaurant.id}`)
-                }
-              >
-                View Details
-              </button>
 
             </div>
 
-          </div>
-        ))}
+          ))}
 
-      </div>
+        </div>
+      )}
 
     </section>
   );
