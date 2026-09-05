@@ -2,12 +2,30 @@ import "./FeaturedRestaurants.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import pizza from "../../assets/images/pizza.jpg";
+import restaurant1 from "../../assets/images/restaurant1.jpg";
+import restaurant2 from "../../assets/images/restaurant2.jpg";
+import restaurant3 from "../../assets/images/restaurant3.jpg";
+import cafe from "../../assets/images/cafe.jpg";
+import biryani from "../../assets/images/biryani.jpg";
+import burger from "../../assets/images/burger.jpg";
+
 function FeaturedRestaurants() {
   const navigate = useNavigate();
 
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const imageMap = {
+    "pizza.jpg": pizza,
+    "restaurant1.jpg": restaurant1,
+    "restaurant2.jpg": restaurant2,
+    "restaurant3.jpg": restaurant3,
+    "cafe.jpg": cafe,
+    "biryani.jpg": biryani,
+    "burger.jpg": burger,
+  };
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/restaurants/")
@@ -33,15 +51,11 @@ function FeaturedRestaurants() {
     <section className="featured">
 
       <div className="featured-header">
-
-        <h2>
-          Featured Restaurants
-        </h2>
+        <h2>Featured Restaurants</h2>
 
         <p>
           Discover popular restaurants loved by food enthusiasts
         </p>
-
       </div>
 
       {loading && (
@@ -60,14 +74,16 @@ function FeaturedRestaurants() {
         <div className="restaurant-container">
 
           {restaurants.map((restaurant) => (
-
             <div
               className="restaurant-card"
               key={restaurant.id}
             >
 
               <img
-                src={restaurant.image}
+                src={
+                  imageMap[restaurant.image] ||
+                  pizza
+                }
                 alt={restaurant.name}
               />
 
@@ -101,11 +117,10 @@ function FeaturedRestaurants() {
               </div>
 
             </div>
-
           ))}
 
         </div>
-      )}
+      )}    
 
     </section>
   );
