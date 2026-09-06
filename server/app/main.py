@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.database import Base, engine
 from app import models
@@ -8,15 +9,12 @@ from app.routes.restaurants import router as restaurant_router
 from app.routes.categories import router as category_router
 from app.routes.auth import router as auth_router
 
-
 app = FastAPI(
     title="ZestHub API",
     description="Restaurant Discovery and Review Platform API",
     version="1.0.0"
 )
 
-
-# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -28,9 +26,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 Base.metadata.create_all(bind=engine)
 
+# Serve uploaded restaurant images
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.include_router(restaurant_router)
 app.include_router(category_router)
@@ -39,9 +38,7 @@ app.include_router(auth_router)
 
 @app.get("/")
 def home():
-    return {
-        "message": "Welcome to ZestHub API"
-    }
+    return {"message": "Welcome to ZestHub API"}
 
 
 @app.get("/api/health")

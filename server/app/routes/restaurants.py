@@ -1,241 +1,296 @@
-from fastapi import APIRouter,HTTPException,Depends
-from pydantic import BaseModel,Field
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    UploadFile,
+    File,
+    Form
+)
+
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Restaurant,Category
+from app.models import Restaurant, Category
+
+from pathlib import Path
+from uuid import uuid4
 
 
-router=APIRouter(
+router = APIRouter(
     prefix="/api/restaurants",
     tags=["Restaurants"]
 )
 
 
-# -----------------------------
-# Request Data
-# -----------------------------
+# ---------------------------------------------------------
+# Upload configuration
+# ---------------------------------------------------------
 
-class RestaurantCreate(BaseModel):
+UPLOAD_DIR = Path("uploads/restaurants")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-    name:str=Field(
-        min_length=2,
-        max_length=150
-    )
-
-    location:str=Field(
-        min_length=2,
-        max_length=150
-    )
-
-    cuisine:str=Field(
-        min_length=2,
-        max_length=100
-    )
-
-    rating:float=Field(
-        default=0.0,
-        ge=0.0,
-        le=5.0
-    )
-
-    description:str|None=None
-
-    image:str|None=None
-
-    category_id:int|None=None
+ALLOWED_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp"
+}
 
 
-# -----------------------------
-# Response Helper
-# -----------------------------
+def save_restaurant_image(image: UploadFile) -> str:
 
-def restaurant_response(restaurant):
+    if not image.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="Image filename is missing"
+        )
 
-    return {
-        "id":restaurant.id,
-        "name":restaurant.name,
-        "location":restaurant.location,
-        "cuisine":restaurant.cuisine,
-        "rating":restaurant.average_rating,
-        "description":restaurant.description,
-        "image":restaurant.image,
-        "category_id":restaurant.category_id
-    }
+    extension = Path(image.filename).suffix.lower()
+
+    if extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail="Only JPG, JPEG, PNG and WEBP images are allowed"
+        )
+
+    filename = f"{uuid4().hex}{extension}"
+
+    file_path = UPLOAD_DIR / filename
+
+    with open(file_path, "wb") as buffer:
+        buffer.write(image.file.read())
+
+    return f"/uploads/restaurants/{filename}"
 
 
-# -----------------------------
+# ---------------------------------------------------------
 # GET ALL RESTAURANTS
-# -----------------------------
+# ---------------------------------------------------------
 
 @router.get("/")
-def get_restaurants(
-    db:Session=Depends(get_db)
-):
+def get_restaurants(db: Session = Depends(get_db)):
 
-    restaurants=(
-        db.query(Restaurant)
-        .order_by(Restaurant.id)
-        .all()
-    )
+    restaurants = db.query(Restaurant).all()
 
     return [
-        restaurant_response(restaurant)
+        {
+            "id": restaurant.id,
+            "name": restaurant.name,
+            "location": restaurant.location,
+            "cuisine": restaurant.cuisine,
+            "rating": restaurant.average_rating,
+            "description": restaurant.description,
+            "image": restaurant.image,
+            "category_id": restaurant.category_id
+        }
         for restaurant in restaurants
     ]
 
 
-# -----------------------------
-# GET RESTAURANT BY ID
-# -----------------------------
+# ---------------------------------------------------------
+# GET SINGLE RESTAURANT
+# ---------------------------------------------------------
 
 @router.get("/{restaurant_id}")
 def get_restaurant(
-    restaurant_id:int,
-    db:Session=Depends(get_db)
+    restaurant_id: int,
+    db: Session = Depends(get_db)
 ):
 
-    restaurant=(
-        db.query(Restaurant)
-        .filter(Restaurant.id==restaurant_id)
-        .first()
-    )
+    restaurant = db.query(Restaurant).filter(
+        Restaurant.id == restaurant_id
+    ).first()
 
-    if restaurant is None:
+    if not restaurant:
         raise HTTPException(
             status_code=404,
             detail="Restaurant not found"
         )
 
-    return restaurant_response(restaurant)
-
-
-# -----------------------------
-# CREATE RESTAURANT
-# -----------------------------
-
-@router.post("/",status_code=201)
-def create_restaurant(
-    restaurant:RestaurantCreate,
-    db:Session=Depends(get_db)
-):
-
-    # Check category exists
-    if restaurant.category_id is not None:
-
-        category=db.query(Category).filter(
-            Category.id==restaurant.category_id
-        ).first()
-
-        if category is None:
-            raise HTTPException(
-                status_code=400,
-                detail="Category not found"
-            )
-
-    new_restaurant=Restaurant(
-        name=restaurant.name,
-        location=restaurant.location,
-        cuisine=restaurant.cuisine,
-        description=restaurant.description,
-        average_rating=restaurant.rating,
-        image=restaurant.image,
-        category_id=restaurant.category_id
-    )
-
-    db.add(new_restaurant)
-    db.commit()
-    db.refresh(new_restaurant)
-
     return {
-        "message":"Restaurant created successfully",
-        "restaurant":restaurant_response(new_restaurant)
+        "id": restaurant.id,
+        "name": restaurant.name,
+        "location": restaurant.location,
+        "cuisine": restaurant.cuisine,
+        "rating": restaurant.average_rating,
+        "description": restaurant.description,
+        "image": restaurant.image,
+        "category_id": restaurant.category_id
     }
 
 
-# -----------------------------
+# ---------------------------------------------------------
+# CREATE RESTAURANT
+# ---------------------------------------------------------
+
+@router.post("/")
+def create_restaurant(
+    name: str = Form(...),
+    location: str = Form(...),
+    cuisine: str = Form(...),
+    rating: float = Form(0.0),
+    description: str | None = Form(None),
+    category_id: int | None = Form(None),
+    image: UploadFile = File(...),
+
+    db: Session = Depends(get_db)
+):
+
+    # Validate rating
+    if rating < 0 or rating > 5:
+        raise HTTPException(
+            status_code=400,
+            detail="Rating must be between 0 and 5"
+        )
+
+    # Validate category
+    if category_id is not None:
+
+        category = db.query(Category).filter(
+            Category.id == category_id
+        ).first()
+
+        if not category:
+            raise HTTPException(
+                status_code=404,
+                detail="Category not found"
+            )
+
+    # Save image
+    image_path = save_restaurant_image(image)
+
+    # Create restaurant
+    restaurant = Restaurant(
+        name=name,
+        location=location,
+        cuisine=cuisine,
+        average_rating=rating,
+        description=description,
+        image=image_path,
+        category_id=category_id
+    )
+
+    db.add(restaurant)
+    db.commit()
+    db.refresh(restaurant)
+
+    return {
+        "message": "Restaurant created successfully",
+        "restaurant": {
+            "id": restaurant.id,
+            "name": restaurant.name,
+            "location": restaurant.location,
+            "cuisine": restaurant.cuisine,
+            "rating": restaurant.average_rating,
+            "description": restaurant.description,
+            "image": restaurant.image,
+            "category_id": restaurant.category_id
+        }
+    }
+
+
+# ---------------------------------------------------------
 # UPDATE RESTAURANT
-# -----------------------------
+# ---------------------------------------------------------
 
 @router.put("/{restaurant_id}")
 def update_restaurant(
-    restaurant_id:int,
-    restaurant:RestaurantCreate,
-    db:Session=Depends(get_db)
+    restaurant_id: int,
+
+    name: str = Form(...),
+    location: str = Form(...),
+    cuisine: str = Form(...),
+    rating: float = Form(0.0),
+    description: str | None = Form(None),
+    category_id: int | None = Form(None),
+
+    image: UploadFile | None = File(None),
+
+    db: Session = Depends(get_db)
 ):
 
-    existing_restaurant=(
-        db.query(Restaurant)
-        .filter(Restaurant.id==restaurant_id)
-        .first()
-    )
+    restaurant = db.query(Restaurant).filter(
+        Restaurant.id == restaurant_id
+    ).first()
 
-    if existing_restaurant is None:
+    if not restaurant:
         raise HTTPException(
             status_code=404,
             detail="Restaurant not found"
         )
 
-    # Check category exists
-    if restaurant.category_id is not None:
+    # Validate rating
+    if rating < 0 or rating > 5:
+        raise HTTPException(
+            status_code=400,
+            detail="Rating must be between 0 and 5"
+        )
 
-        category=db.query(Category).filter(
-            Category.id==restaurant.category_id
+    # Validate category
+    if category_id is not None:
+
+        category = db.query(Category).filter(
+            Category.id == category_id
         ).first()
 
-        if category is None:
+        if not category:
             raise HTTPException(
-                status_code=400,
+                status_code=404,
                 detail="Category not found"
             )
 
-    existing_restaurant.name=restaurant.name
-    existing_restaurant.location=restaurant.location
-    existing_restaurant.cuisine=restaurant.cuisine
-    existing_restaurant.description=restaurant.description
-    existing_restaurant.average_rating=restaurant.rating
-    existing_restaurant.image=restaurant.image
-    existing_restaurant.category_id=restaurant.category_id
+    restaurant.name = name
+    restaurant.location = location
+    restaurant.cuisine = cuisine
+    restaurant.average_rating = rating
+    restaurant.description = description
+    restaurant.category_id = category_id
+
+    # Replace image only if a new image was selected
+    if image and image.filename:
+        restaurant.image = save_restaurant_image(image)
 
     db.commit()
-    db.refresh(existing_restaurant)
+    db.refresh(restaurant)
 
     return {
-        "message":"Restaurant updated successfully",
-        "restaurant":restaurant_response(existing_restaurant)
+        "message": "Restaurant updated successfully",
+        "restaurant": {
+            "id": restaurant.id,
+            "name": restaurant.name,
+            "location": restaurant.location,
+            "cuisine": restaurant.cuisine,
+            "rating": restaurant.average_rating,
+            "description": restaurant.description,
+            "image": restaurant.image,
+            "category_id": restaurant.category_id
+        }
     }
 
 
-# -----------------------------
+# ---------------------------------------------------------
 # DELETE RESTAURANT
-# -----------------------------
+# ---------------------------------------------------------
 
 @router.delete("/{restaurant_id}")
 def delete_restaurant(
-    restaurant_id:int,
-    db:Session=Depends(get_db)
+    restaurant_id: int,
+    db: Session = Depends(get_db)
 ):
 
-    restaurant=(
-        db.query(Restaurant)
-        .filter(Restaurant.id==restaurant_id)
-        .first()
-    )
+    restaurant = db.query(Restaurant).filter(
+        Restaurant.id == restaurant_id
+    ).first()
 
-    if restaurant is None:
+    if not restaurant:
         raise HTTPException(
             status_code=404,
             detail="Restaurant not found"
         )
-
-    deleted_restaurant=restaurant_response(
-        restaurant
-    )
 
     db.delete(restaurant)
     db.commit()
 
     return {
-        "message":"Restaurant deleted successfully",
-        "restaurant":deleted_restaurant
+        "message": "Restaurant deleted successfully"
     }

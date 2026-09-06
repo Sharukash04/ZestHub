@@ -1,36 +1,44 @@
 import "./Restaurants.css";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Restaurants() {
-  const restaurants = [
-    {
-      name: "Spice Garden",
-      rating: "4.8",
-      reviews: "2.4K",
-      location: "Trichy",
-      cuisine: "South Indian",
-    },
-    {
-      name: "Royal Biryani House",
-      rating: "4.9",
-      reviews: "3.1K",
-      location: "Trichy",
-      cuisine: "Biryani",
-    },
-    {
-      name: "Urban Cafe",
-      rating: "4.6",
-      reviews: "1.8K",
-      location: "Trichy",
-      cuisine: "Cafe & Beverages",
-    },
-    {
-      name: "Burger Point",
-      rating: "4.5",
-      reviews: "1.5K",
-      location: "Trichy",
-      cuisine: "Fast Food",
-    },
-  ];
+  const [restaurants, setRestaurants] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/restaurants/")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch restaurants");
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        setRestaurants(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setError("Unable to load restaurants");
+        setLoading(false);
+      });
+  }, []);
+
+  const filteredRestaurants = restaurants.filter((restaurant) => {
+    const searchText = search.toLowerCase();
+
+    return (
+      restaurant.name?.toLowerCase().includes(searchText) ||
+      restaurant.cuisine?.toLowerCase().includes(searchText) ||
+      restaurant.location?.toLowerCase().includes(searchText)
+    );
+  });
 
   return (
     <section className="restaurants-page">
@@ -47,6 +55,8 @@ function Restaurants() {
         <input
           type="text"
           placeholder="Search restaurants, cuisines or locations..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
 
         <button>
@@ -55,19 +65,35 @@ function Restaurants() {
       </div>
 
       <div className="restaurant-filters">
-
         <button>All</button>
         <button>Top Rated</button>
         <button>Most Reviewed</button>
         <button>Trending</button>
-
       </div>
+
+      {loading && (
+        <p className="restaurant-message">
+          Loading restaurants...
+        </p>
+      )}
+
+      {error && (
+        <p className="restaurant-message error">
+          {error}
+        </p>
+      )}
+
+      {!loading && !error && filteredRestaurants.length === 0 && (
+        <p className="restaurant-message">
+          No restaurants found.
+        </p>
+      )}
 
       <div className="restaurants-grid">
 
-        {restaurants.map((restaurant, index) => (
+        {filteredRestaurants.map((restaurant) => (
 
-          <div className="listing-card" key={index}>
+          <div className="listing-card" key={restaurant.id}>
 
             <div className="listing-image">
               🍽️
@@ -82,10 +108,6 @@ function Restaurants() {
               </div>
 
               <p>
-                💬 {restaurant.reviews} Reviews
-              </p>
-
-              <p>
                 📍 {restaurant.location}
               </p>
 
@@ -93,7 +115,10 @@ function Restaurants() {
                 🍴 {restaurant.cuisine}
               </p>
 
-              <button className="details-button">
+              <button
+                className="details-button"
+                onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+              >
                 View Details
               </button>
 
