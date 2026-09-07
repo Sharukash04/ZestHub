@@ -1,0 +1,441 @@
+/* =========================================================
+   ZESTHUB EDIT RESTAURANT
+   ========================================================= */
+
+.edit-page {
+  min-height: calc(100vh - 70px);
+
+  background: #fff8f5;
+
+  padding: 45px;
+}
+
+.edit-container {
+  max-width: 1000px;
+
+  margin: 0 auto;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.edit-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-start;
+
+  margin-bottom: 30px;
+}
+
+.edit-label {
+  margin: 0 0 8px;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  letter-spacing: 2px;
+
+  color: #8b7770;
+}
+
+.edit-header h1 {
+  margin: 0 0 8px;
+
+  font-size: 34px;
+
+  color: #111111;
+}
+
+.edit-header p {
+  color: #766a65;
+
+  margin: 0;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+   ========================================================= */
+
+.edit-back-btn {
+  border: 1px solid #ddd1cc;
+
+  background: #ffffff;
+
+  color: #333333;
+
+  padding: 11px 17px;
+
+  border-radius: 9px;
+
+  font-family: inherit;
+
+  font-size: 14px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.edit-back-btn:hover {
+  background: #fff1ec;
+}
+
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.edit-form {
+  background: #ffffff;
+
+  border: 1px solid #eadfd9;
+
+  border-radius: 18px;
+
+  padding: 32px;
+
+  box-shadow:
+    0 5px 20px rgba(80, 50, 40, 0.04);
+}
+
+.edit-grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 23px;
+}
+
+.edit-group {
+  display: flex;
+
+  flex-direction: column;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.edit-group label {
+  font-size: 14px;
+
+  font-weight: 600;
+
+  margin-bottom: 8px;
+
+  color: #222222;
+}
+
+
+/* =========================================================
+   INPUTS
+   ========================================================= */
+
+.edit-group input,
+.edit-group select,
+.edit-group textarea {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border: 1px solid #ddd2cd;
+
+  border-radius: 9px;
+
+  padding: 13px 14px;
+
+  background: #ffffff;
+
+  color: #222222;
+
+  font-family: inherit;
+
+  font-size: 14px;
+
+  outline: none;
+
+  transition: border 0.2s;
+}
+
+.edit-group input:focus,
+.edit-group select:focus,
+.edit-group textarea:focus {
+  border-color: #111111;
+}
+
+.edit-group textarea {
+  resize: vertical;
+}
+
+
+/* =========================================================
+   IMAGE UPLOAD
+   ========================================================= */
+
+.edit-image-upload input {
+  display: none;
+}
+
+.edit-upload-box {
+  height: 270px;
+
+  border: 2px dashed #d9cbc5;
+
+  border-radius: 14px;
+
+  background: #fffaf8;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  align-items: center;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  text-align: center;
+
+  transition: 0.2s;
+}
+
+.edit-upload-box:hover {
+  background: #fff5f1;
+
+  border-color: #b9aaa3;
+}
+
+.edit-upload-box span {
+  font-size: 42px;
+
+  margin-bottom: 10px;
+}
+
+.edit-upload-box strong {
+  font-size: 15px;
+}
+
+.edit-upload-box small {
+  margin-top: 6px;
+
+  color: #8b7d77;
+}
+
+.edit-upload-box img {
+  width: 100%;
+
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+.new-image-text {
+  margin-top: 8px;
+
+  color: #766a65;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   SUCCESS / ERROR
+   ========================================================= */
+
+.edit-success {
+  margin-top: 20px;
+
+  padding: 13px;
+
+  border-radius: 9px;
+
+  background: #eef8ee;
+
+  color: #2e6b32;
+
+  font-size: 14px;
+}
+
+.edit-error-message {
+  margin-top: 20px;
+
+  padding: 13px;
+
+  border-radius: 9px;
+
+  background: #fff0ef;
+
+  color: #a33a32;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.edit-actions {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 12px;
+
+  margin-top: 30px;
+
+  padding-top: 25px;
+
+  border-top: 1px solid #eee5e1;
+}
+
+.edit-cancel-btn,
+.edit-save-btn {
+  padding: 12px 22px;
+
+  border-radius: 9px;
+
+  font-family: inherit;
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.edit-cancel-btn {
+  border: 1px solid #ddd2cd;
+
+  background: #ffffff;
+
+  color: #333333;
+}
+
+.edit-cancel-btn:hover {
+  background: #fff5f1;
+}
+
+.edit-save-btn {
+  border: none;
+
+  background: #111111;
+
+  color: #ffffff;
+}
+
+.edit-save-btn:hover {
+  background: #333333;
+}
+
+.edit-save-btn:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.edit-loading {
+  min-height: 60vh;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  color: #766a65;
+
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   ERROR PAGE
+   ========================================================= */
+
+.edit-error {
+  max-width: 600px;
+
+  margin: 100px auto;
+
+  padding: 40px;
+
+  background: #ffffff;
+
+  border: 1px solid #eadfd9;
+
+  border-radius: 16px;
+
+  text-align: center;
+}
+
+.edit-error h2 {
+  margin-top: 0;
+}
+
+.edit-error p {
+  color: #766a65;
+}
+
+.edit-error button {
+  margin-top: 15px;
+
+  border: none;
+
+  background: #111111;
+
+  color: #ffffff;
+
+  padding: 11px 18px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .edit-page {
+    padding: 25px 15px;
+  }
+
+  .edit-header {
+    flex-direction: column;
+
+    gap: 20px;
+  }
+
+  .edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  .edit-form {
+    padding: 20px;
+  }
+
+  .edit-upload-box {
+    height: 220px;
+  }
+
+}

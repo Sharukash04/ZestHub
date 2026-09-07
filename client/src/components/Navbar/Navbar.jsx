@@ -8,7 +8,7 @@ function Navbar() {
       {/* Logo */}
       <div className="logo">
         <Link to="/">
-          🍴 ZestHub
+          🍽️ ZestHub
         </Link>
       </div>
 

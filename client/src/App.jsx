@@ -8,6 +8,11 @@ import TrendingRestaurants from "./components/TrendingRestaurants/TrendingRestau
 import Restaurants from "./pages/Restaurants/Restaurants";
 import RestaurantDetails from "./pages/RestaurantDetails";
 
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AddRestaurant from "./pages/Admin/AddRestaurant";
+import EditRestaurant from "./pages/Admin/EditRestaurant";
+
+
 function Home() {
   return (
     <>
@@ -18,18 +23,65 @@ function Home() {
   );
 }
 
+
 function App() {
   return (
     <>
       <Navbar />
 
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/restaurants" element={<Restaurants />} />
-        <Route path="/restaurant/:id" element={<RestaurantDetails />} />
+
+        {/* ================= HOME ================= */}
+
+        <Route
+          path="/"
+          element={<Home />}
+        />
+
+
+        {/* ================= RESTAURANTS ================= */}
+
+        <Route
+          path="/restaurants"
+          element={<Restaurants />}
+        />
+
+
+        {/* ================= RESTAURANT DETAILS ================= */}
+
+        <Route
+          path="/restaurant/:id"
+          element={<RestaurantDetails />}
+        />
+
+
+        {/* ================= ADMIN DASHBOARD ================= */}
+
+        <Route
+          path="/admin"
+          element={<AdminDashboard />}
+        />
+
+
+        {/* ================= ADD RESTAURANT ================= */}
+
+        <Route
+          path="/admin/restaurants/add"
+          element={<AddRestaurant />}
+        />
+
+
+        {/* ================= EDIT RESTAURANT ================= */}
+
+        <Route
+          path="/admin/restaurants/edit/:id"
+          element={<EditRestaurant />}
+        />
+
       </Routes>
     </>
   );
 }
+
 
 export default App;

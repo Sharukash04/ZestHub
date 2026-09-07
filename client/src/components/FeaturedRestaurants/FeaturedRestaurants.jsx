@@ -27,6 +27,21 @@ function FeaturedRestaurants() {
     "burger.jpg": burger,
   };
 
+  // Convert backend image path into a complete URL
+  const getRestaurantImage = (image) => {
+    if (!image) {
+      return pizza;
+    }
+
+    // Uploaded image from FastAPI
+    if (image.startsWith("/uploads/")) {
+      return `http://127.0.0.1:8000${image}`;
+    }
+
+    // Existing local images
+    return imageMap[image] || pizza;
+  };
+
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/restaurants/")
       .then((response) => {
@@ -80,10 +95,7 @@ function FeaturedRestaurants() {
             >
 
               <img
-                src={
-                  imageMap[restaurant.image] ||
-                  pizza
-                }
+                src={getRestaurantImage(restaurant.image)}
                 alt={restaurant.name}
               />
 
@@ -120,7 +132,7 @@ function FeaturedRestaurants() {
           ))}
 
         </div>
-      )}    
+      )}
 
     </section>
   );
