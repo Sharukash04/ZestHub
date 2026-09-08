@@ -1,6 +1,6 @@
+import "./RestaurantDetails.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "./RestaurantDetails.css";
 
 import pizza from "../assets/images/pizza.jpg";
 import restaurant1 from "../assets/images/restaurant1.jpg";
@@ -18,93 +18,187 @@ function RestaurantDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Existing local restaurant images
   const imageMap = {
-    "pizza.jpg": pizza,
-    "restaurant1.jpg": restaurant1,
-    "restaurant2.jpg": restaurant2,
-    "restaurant3.jpg": restaurant3,
-    "cafe.jpg": cafe,
-    "biryani.jpg": biryani,
-    "burger.jpg": burger,
+    "bella-italia.jpg": restaurant1,
+    "trichy-kitchen.jpg": restaurant2,
+    "barbeque-nation.jpg": restaurant3,
+    "chinese-wok.jpg": restaurant1,
+    "parashy-cafe.jpg": cafe,
+    "hotel-kannappa.jpg": restaurant2,
+    "kms-hakkim.jpg": restaurant3,
+    "gorets-cafe.jpg": cafe,
+    "cascade-cafe.jpg": cafe,
+    "suvai-briyani.jpg": biryani,
+    "grill-chicken.jpg": burger,
   };
 
+  // Convert backend image into a usable browser URL
+  const getRestaurantImage = (image) => {
+    // No image
+    if (!image) {
+      return pizza;
+    }
+
+    // New image uploaded through FastAPI
+    if (image.startsWith("/uploads/")) {
+      return `http://127.0.0.1:8000${image}`;
+    }
+
+    // Existing local image
+    return imageMap[image] || pizza;
+  };
+
+  // Fetch restaurant
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/restaurants/${id}`)
-      .then((response) => {
+    const fetchRestaurant = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(
+          `http://127.0.0.1:8000/api/restaurants/${id}`
+        );
+
         if (!response.ok) {
           throw new Error("Restaurant not found");
         }
 
-        return response.json();
-      })
-      .then((data) => {
+        const data = await response.json();
+
+        console.log("Restaurant details:", data);
+
         setRestaurant(data);
+      } catch (err) {
+        console.error(
+          "Restaurant details error:",
+          err
+        );
+
+        setError(
+          err.message || "Unable to load restaurant."
+        );
+      } finally {
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error(error);
-        setError("Unable to load restaurant details.");
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchRestaurant();
   }, [id]);
 
+  // Loading
   if (loading) {
     return (
-      <div className="details-page">
-        <h2>Loading restaurant...</h2>
+      <div className="restaurant-details-page">
+        <div className="restaurant-details-loading">
+          Loading restaurant...
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  // Error
+  if (error || !restaurant) {
     return (
-      <div className="details-page">
-        <h2>{error}</h2>
+      <div className="restaurant-details-page">
+        <div className="restaurant-details-error">
 
-        <button
-          className="back-btn"
-          onClick={() => navigate("/restaurants")}
-        >
-          Back to Restaurants
-        </button>
+          <h2>
+            {error || "Restaurant not found"}
+          </h2>
+
+          <button
+            onClick={() =>
+              navigate("/restaurants")
+            }
+          >
+            ← Back to Restaurants
+          </button>
+
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="details-page">
+    <div className="restaurant-details-page">
 
-      <div className="details-card">
+      <div className="restaurant-details-card">
 
-        <img
-          src={imageMap[restaurant.image] || pizza}
-          alt={restaurant.name}
-          className="details-image"
-        />
+        {/* Restaurant Image */}
+        <div className="restaurant-details-image">
 
-        <div className="details-content">
+          <img
+            src={getRestaurantImage(
+              restaurant.image
+            )}
+            alt={restaurant.name}
+          />
 
-          <h1>{restaurant.name}</h1>
+        </div>
 
-          <div className="details-rating">
-            ⭐ {restaurant.rating}
+        {/* Restaurant Information */}
+        <div className="restaurant-details-info">
+
+          <h1>
+            {restaurant.name}
+          </h1>
+
+          {/* Rating */}
+          <div className="restaurant-rating">
+
+            <span className="star">
+              ⭐
+            </span>
+
+            <span>
+              {restaurant.average_rating ??
+                restaurant.rating ??
+                "0.0"}
+            </span>
+
           </div>
 
-          <p>
-            🍴 <strong>Cuisine:</strong> {restaurant.cuisine}
+          {/* Cuisine */}
+          <div className="restaurant-detail-row">
+
+            <span className="detail-icon">
+              🍴
+            </span>
+
+            <span>
+              <strong>Cuisine:</strong>{" "}
+              {restaurant.cuisine}
+            </span>
+
+          </div>
+
+          {/* Location */}
+          <div className="restaurant-detail-row">
+
+            <span className="detail-icon">
+              📍
+            </span>
+
+            <span>
+              <strong>Location:</strong>{" "}
+              {restaurant.location}
+            </span>
+
+          </div>
+
+          {/* Description */}
+          <p className="restaurant-description">
+            {restaurant.description ||
+              "No description available for this restaurant."}
           </p>
 
-          <p>
-            📍 <strong>Location:</strong> {restaurant.location}
-          </p>
-
-          <p className="details-description">
-            {restaurant.description}
-          </p>
-
+          {/* Back Button */}
           <button
-            className="back-btn"
-            onClick={() => navigate("/restaurants")}
+            className="back-restaurants-btn"
+            onClick={() =>
+              navigate("/restaurants")
+            }
           >
             ← Back to Restaurants
           </button>

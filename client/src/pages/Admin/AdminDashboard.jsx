@@ -8,28 +8,139 @@ function AdminDashboard() {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  // Delete confirmation
+  const [restaurantToDelete, setRestaurantToDelete] =
+    useState(null);
+
+  const [deleting, setDeleting] = useState(false);
+
+  // Fetch restaurants
   const fetchRestaurants = async () => {
     try {
+      setLoading(true);
+      setError("");
+
       const response = await fetch(
         "http://127.0.0.1:8000/api/restaurants/"
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch restaurants");
+        throw new Error(
+          "Failed to load restaurants."
+        );
       }
 
       const data = await response.json();
+
       setRestaurants(data);
-    } catch (error) {
-      console.error("Error:", error);
+    } catch (err) {
+      console.error(
+        "Restaurant fetch error:",
+        err
+      );
+
+      setError(
+        err.message ||
+          "Unable to load restaurants."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  // Load restaurants when page opens
   useEffect(() => {
     fetchRestaurants();
   }, []);
+
+  // Open delete confirmation
+  const handleDeleteClick = (restaurant) => {
+    setMessage("");
+    setError("");
+
+    setRestaurantToDelete(restaurant);
+  };
+
+  // Cancel delete
+  const handleCancelDelete = () => {
+    if (deleting) {
+      return;
+    }
+
+    setRestaurantToDelete(null);
+  };
+
+  // Delete restaurant
+  const handleConfirmDelete = async () => {
+    if (!restaurantToDelete) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError("");
+      setMessage("");
+
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/restaurants/${restaurantToDelete.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.detail ||
+            "Failed to delete restaurant."
+        );
+      }
+
+      // Remove restaurant immediately from UI
+      setRestaurants((previousRestaurants) =>
+        previousRestaurants.filter(
+          (restaurant) =>
+            restaurant.id !==
+            restaurantToDelete.id
+        )
+      );
+
+      setMessage(
+        `"${restaurantToDelete.name}" deleted successfully.`
+      );
+
+      setRestaurantToDelete(null);
+    } catch (err) {
+      console.error(
+        "Delete restaurant error:",
+        err
+      );
+
+      setError(
+        err.message ||
+          "Unable to delete restaurant."
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // Restaurant image helper
+  const getRestaurantImage = (image) => {
+    if (!image) {
+      return null;
+    }
+
+    if (image.startsWith("/uploads/")) {
+      return `http://127.0.0.1:8000${image}`;
+    }
+
+    return image;
+  };
 
   return (
     <div className="admin-dashboard">
@@ -43,31 +154,46 @@ function AdminDashboard() {
         </div>
 
         <nav>
-          <button className="active">
+
+          <button
+            className="active"
+            onClick={() =>
+              navigate("/admin")
+            }
+          >
             📊 Dashboard
           </button>
 
-          <button onClick={() => navigate("/admin/restaurants/add")}>
+          <button
+            onClick={() =>
+              navigate(
+                "/admin/restaurants/add"
+              )
+            }
+          >
             ➕ Add Restaurant
           </button>
 
-          <button>
-            🍴 Restaurants
+          <button
+            onClick={() =>
+              navigate("/restaurants")
+            }
+          >
+            🍴 View Restaurants
           </button>
 
-          <button>
-            ⭐ Reviews
-          </button>
-
-          <button>
-            👥 Users
-          </button>
         </nav>
 
         <div className="admin-sidebar-bottom">
-          <button onClick={() => navigate("/")}>
+
+          <button
+            onClick={() =>
+              navigate("/")
+            }
+          >
             🏠 Back to ZestHub
           </button>
+
         </div>
 
       </aside>
@@ -75,239 +201,433 @@ function AdminDashboard() {
       {/* Main Content */}
       <main className="admin-main">
 
+        {/* Header */}
         <div className="admin-header">
 
           <div>
-            <p className="admin-small-title">
-              ZESTHUB ADMIN
+            <p className="admin-welcome">
+              Welcome back 👋
             </p>
 
-            <h1>Restaurant Dashboard</h1>
+            <h1>
+              Admin Dashboard
+            </h1>
 
-            <p>
-              Manage your restaurants and food listings.
+            <p className="admin-subtitle">
+              Manage your restaurants and
+              listings from here.
             </p>
           </div>
 
           <button
             className="add-restaurant-btn"
-            onClick={() => navigate("/admin/restaurants/add")}
+            onClick={() =>
+              navigate(
+                "/admin/restaurants/add"
+              )
+            }
           >
             + Add Restaurant
           </button>
 
         </div>
 
+        {/* Messages */}
+
+        {message && (
+          <div className="admin-success-message">
+            <span>✓</span>
+            {message}
+          </div>
+        )}
+
+        {error && (
+          <div className="admin-error-message">
+            <span>!</span>
+            {error}
+          </div>
+        )}
+
         {/* Statistics */}
+
         <div className="admin-stats">
 
           <div className="stat-card">
-            <div className="stat-icon">🍴</div>
+
+            <div className="stat-icon">
+              🍽️
+            </div>
 
             <div>
-              <span>Total Restaurants</span>
-              <h2>{restaurants.length}</h2>
+              <span>
+                Total Restaurants
+              </span>
+
+              <strong>
+                {restaurants.length}
+              </strong>
             </div>
+
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon">⭐</div>
+
+            <div className="stat-icon">
+              ⭐
+            </div>
 
             <div>
-              <span>Average Rating</span>
+              <span>
+                Average Rating
+              </span>
 
-              <h2>
+              <strong>
                 {restaurants.length > 0
                   ? (
                       restaurants.reduce(
-                        (sum, restaurant) =>
-                          sum + (restaurant.rating || 0),
+                        (total, restaurant) =>
+                          total +
+                          Number(
+                            restaurant.average_rating ??
+                              restaurant.rating ??
+                              0
+                          ),
                         0
-                      ) / restaurants.length
+                      ) /
+                      restaurants.length
                     ).toFixed(1)
                   : "0.0"}
-              </h2>
+              </strong>
             </div>
+
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon">📍</div>
+
+            <div className="stat-icon">
+              📍
+            </div>
 
             <div>
-              <span>Locations</span>
+              <span>
+                Locations
+              </span>
 
-              <h2>
+              <strong>
                 {
                   new Set(
                     restaurants.map(
-                      (restaurant) => restaurant.location
+                      (restaurant) =>
+                        restaurant.location
                     )
                   ).size
                 }
-              </h2>
+              </strong>
             </div>
+
           </div>
 
         </div>
 
         {/* Restaurant Section */}
-        <section className="admin-restaurant-section">
+
+        <section className="admin-restaurants-section">
 
           <div className="section-heading">
 
             <div>
-              <h2>Restaurants</h2>
+              <h2>
+                Restaurant Management
+              </h2>
+
               <p>
-                Manage your restaurant listings
+                View, edit or delete
+                restaurant listings.
               </p>
             </div>
 
-            <button
-              onClick={() =>
-                navigate("/admin/restaurants/add")
-              }
-            >
-              + Add Restaurant
-            </button>
+            <span className="restaurant-count">
+              {restaurants.length}{" "}
+              Restaurants
+            </span>
 
           </div>
 
-          {loading ? (
-            <div className="admin-loading">
-              Loading restaurants...
-            </div>
-          ) : restaurants.length === 0 ? (
-            <div className="admin-empty">
-              <div>🍽️</div>
+          {/* Loading */}
 
-              <h3>No restaurants found</h3>
+          {loading && (
+            <div className="admin-loading">
+              <div className="loading-spinner"></div>
 
               <p>
-                Start by adding your first restaurant.
+                Loading restaurants...
               </p>
-
-              <button
-                onClick={() =>
-                  navigate("/admin/restaurants/add")
-                }
-              >
-                Add Restaurant
-              </button>
-            </div>
-          ) : (
-            <div className="admin-table-wrapper">
-
-              <table className="admin-table">
-
-                <thead>
-                  <tr>
-                    <th>Restaurant</th>
-                    <th>Location</th>
-                    <th>Cuisine</th>
-                    <th>Rating</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-
-                  {restaurants.map((restaurant) => (
-
-                    <tr key={restaurant.id}>
-
-                      <td>
-                        <div className="restaurant-name-cell">
-
-                          <div className="restaurant-thumb">
-
-                            {restaurant.image ? (
-                              <img
-                                src={
-                                  restaurant.image.startsWith(
-                                    "/uploads/"
-                                  )
-                                    ? `http://127.0.0.1:8000${restaurant.image}`
-                                    : restaurant.image
-                                }
-                                alt={restaurant.name}
-                              />
-                            ) : (
-                              <span>🍽️</span>
-                            )}
-
-                          </div>
-
-                          <div>
-                            <strong>
-                              {restaurant.name}
-                            </strong>
-
-                            <small>
-                              ID #{restaurant.id}
-                            </small>
-                          </div>
-
-                        </div>
-                      </td>
-
-                      <td>
-                        📍 {restaurant.location}
-                      </td>
-
-                      <td>
-                        {restaurant.cuisine}
-                      </td>
-
-                      <td>
-                        <span className="rating-badge">
-                          ⭐ {restaurant.rating || "N/A"}
-                        </span>
-                      </td>
-
-                      <td>
-
-                        <div className="action-buttons">
-
-                          <button
-                            className="view-btn"
-                            onClick={() =>
-                              navigate(
-                                `/restaurant/${restaurant.id}`
-                              )
-                            }
-                          >
-                            View
-                          </button>
-
-                          <button
-                            className="edit-btn"
-                            onClick={() =>
-                              navigate(
-                                `/admin/restaurants/edit/${restaurant.id}`
-                              )
-                            }
-                          >
-                            Edit
-                          </button>
-
-                        </div>
-
-                      </td>
-
-                    </tr>
-
-                  ))}
-
-                </tbody>
-
-              </table>
-
             </div>
           )}
+
+          {/* Empty */}
+
+          {!loading &&
+            restaurants.length === 0 &&
+            !error && (
+              <div className="admin-empty">
+
+                <div className="empty-icon">
+                  🍽️
+                </div>
+
+                <h3>
+                  No Restaurants Yet
+                </h3>
+
+                <p>
+                  Add your first restaurant
+                  to get started.
+                </p>
+
+                <button
+                  onClick={() =>
+                    navigate(
+                      "/admin/restaurants/add"
+                    )
+                  }
+                >
+                  + Add Restaurant
+                </button>
+
+              </div>
+            )}
+
+          {/* Restaurant List */}
+
+          {!loading &&
+            restaurants.length > 0 && (
+              <div className="restaurant-table">
+
+                {/* Table Header */}
+
+                <div className="restaurant-table-header">
+
+                  <div>
+                    Restaurant
+                  </div>
+
+                  <div>
+                    Location
+                  </div>
+
+                  <div>
+                    Cuisine
+                  </div>
+
+                  <div>
+                    Rating
+                  </div>
+
+                  <div>
+                    Actions
+                  </div>
+
+                </div>
+
+                {/* Rows */}
+
+                {restaurants.map(
+                  (restaurant) => (
+                    <div
+                      className="restaurant-row"
+                      key={restaurant.id}
+                    >
+
+                      {/* Restaurant */}
+
+                      <div className="restaurant-cell restaurant-name-cell">
+
+                        <div className="admin-restaurant-image">
+
+                          {getRestaurantImage(
+                            restaurant.image
+                          ) ? (
+                            <img
+                              src={getRestaurantImage(
+                                restaurant.image
+                              )}
+                              alt={
+                                restaurant.name
+                              }
+                            />
+                          ) : (
+                            <div className="no-image">
+                              🍽️
+                            </div>
+                          )}
+
+                        </div>
+
+                        <div>
+                          <h3>
+                            {restaurant.name}
+                          </h3>
+
+                          <span>
+                            ID #{restaurant.id}
+                          </span>
+                        </div>
+
+                      </div>
+
+                      {/* Location */}
+
+                      <div className="restaurant-cell location-cell">
+
+                        <span className="cell-icon">
+                          📍
+                        </span>
+
+                        <span>
+                          {restaurant.location}
+                        </span>
+
+                      </div>
+
+                      {/* Cuisine */}
+
+                      <div className="restaurant-cell cuisine-cell">
+
+                        {restaurant.cuisine}
+
+                      </div>
+
+                      {/* Rating */}
+
+                      <div className="restaurant-cell rating-cell">
+
+                        <span className="rating-badge">
+                          ⭐{" "}
+                          {restaurant.average_rating ??
+                            restaurant.rating ??
+                            "0.0"}
+                        </span>
+
+                      </div>
+
+                      {/* Actions */}
+
+                      <div className="restaurant-cell action-cell">
+
+                        <button
+                          className="view-btn"
+                          onClick={() =>
+                            navigate(
+                              `/restaurant/${restaurant.id}`
+                            )
+                          }
+                        >
+                          View
+                        </button>
+
+                        <button
+                          className="edit-btn"
+                          onClick={() =>
+                            navigate(
+                              `/admin/restaurants/edit/${restaurant.id}`
+                            )
+                          }
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="delete-btn"
+                          onClick={() =>
+                            handleDeleteClick(
+                              restaurant
+                            )
+                          }
+                        >
+                          Delete
+                        </button>
+
+                      </div>
+
+                    </div>
+                  )
+                )}
+
+              </div>
+            )}
 
         </section>
 
       </main>
+
+      {/* DELETE CONFIRMATION MODAL */}
+
+      {restaurantToDelete && (
+        <div
+          className="delete-modal-overlay"
+          onClick={handleCancelDelete}
+        >
+
+          <div
+            className="delete-modal"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            <div className="delete-modal-icon">
+              🗑️
+            </div>
+
+            <h2>
+              Delete Restaurant?
+            </h2>
+
+            <p>
+              Are you sure you want to
+              delete
+              <strong>
+                {" "}
+                "{restaurantToDelete.name}"
+              </strong>
+              ?
+            </p>
+
+            <span className="delete-warning">
+              This action cannot be undone.
+            </span>
+
+            <div className="delete-modal-actions">
+
+              <button
+                className="modal-cancel-btn"
+                onClick={
+                  handleCancelDelete
+                }
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="modal-delete-btn"
+                onClick={
+                  handleConfirmDelete
+                }
+                disabled={deleting}
+              >
+                {deleting
+                  ? "Deleting..."
+                  : "Delete Restaurant"}
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
     </div>
   );

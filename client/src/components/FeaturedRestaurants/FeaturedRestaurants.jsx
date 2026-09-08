@@ -17,31 +17,38 @@ function FeaturedRestaurants() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Existing local restaurant images
   const imageMap = {
-    "pizza.jpg": pizza,
-    "restaurant1.jpg": restaurant1,
-    "restaurant2.jpg": restaurant2,
-    "restaurant3.jpg": restaurant3,
-    "cafe.jpg": cafe,
-    "biryani.jpg": biryani,
-    "burger.jpg": burger,
+    "bella-italia.jpg": restaurant1,
+    "trichy-kitchen.jpg": restaurant2,
+    "barbeque-nation.jpg": restaurant3,
+    "chinese-wok.jpg": restaurant1,
+    "parashy-cafe.jpg": cafe,
+    "hotel-kannappa.jpg": restaurant2,
+    "kms-hakkim.jpg": restaurant3,
+    "gorets-cafe.jpg": cafe,
+    "cascade-cafe.jpg": cafe,
+    "suvai-briyani.jpg": biryani,
+    "grill-chicken.jpg": burger,
   };
 
-  // Convert backend image path into a complete URL
+  // Convert backend image path into complete URL
   const getRestaurantImage = (image) => {
+    // No image
     if (!image) {
       return pizza;
     }
 
-    // Uploaded image from FastAPI
+    // Image uploaded through FastAPI
     if (image.startsWith("/uploads/")) {
       return `http://127.0.0.1:8000${image}`;
     }
 
-    // Existing local images
+    // Existing local image
     return imageMap[image] || pizza;
   };
 
+  // Fetch restaurants
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/restaurants/")
       .then((response) => {
@@ -57,6 +64,7 @@ function FeaturedRestaurants() {
       })
       .catch((error) => {
         console.error("Restaurant fetch error:", error);
+
         setError("Unable to load restaurants");
         setLoading(false);
       });
@@ -65,6 +73,7 @@ function FeaturedRestaurants() {
   return (
     <section className="featured">
 
+      {/* Header */}
       <div className="featured-header">
         <h2>Featured Restaurants</h2>
 
@@ -73,18 +82,26 @@ function FeaturedRestaurants() {
         </p>
       </div>
 
+      {/* Loading */}
       {loading && (
         <p style={{ textAlign: "center" }}>
           Loading restaurants...
         </p>
       )}
 
+      {/* Error */}
       {error && (
-        <p style={{ textAlign: "center", color: "red" }}>
+        <p
+          style={{
+            textAlign: "center",
+            color: "red",
+          }}
+        >
           {error}
         </p>
       )}
 
+      {/* Restaurant Cards */}
       {!loading && !error && (
         <div className="restaurant-container">
 
@@ -94,11 +111,13 @@ function FeaturedRestaurants() {
               key={restaurant.id}
             >
 
+              {/* Restaurant Image */}
               <img
                 src={getRestaurantImage(restaurant.image)}
                 alt={restaurant.name}
               />
 
+              {/* Restaurant Information */}
               <div className="restaurant-info">
 
                 <h3>
@@ -106,7 +125,7 @@ function FeaturedRestaurants() {
                 </h3>
 
                 <div className="rating">
-                  ⭐ {restaurant.rating}
+                  ⭐ {restaurant.average_rating ?? restaurant.rating}
                 </div>
 
                 <p>
@@ -120,7 +139,9 @@ function FeaturedRestaurants() {
                 <button
                   type="button"
                   onClick={() =>
-                    navigate(`/restaurant/${restaurant.id}`)
+                    navigate(
+                      `/restaurant/${restaurant.id}`
+                    )
                   }
                 >
                   View Details

@@ -1,24 +1,23 @@
-/* =========================================================
-   ZESTHUB ADMIN DASHBOARD
-   ========================================================= */
-
 .admin-dashboard {
   min-height: 100vh;
+
   display: flex;
+
   background: #fff8f5;
 }
 
-
-/* =========================================================
+/* =========================
    SIDEBAR
-   ========================================================= */
+========================= */
 
 .admin-sidebar {
   width: 250px;
   min-height: 100vh;
+
   box-sizing: border-box;
 
   background: #ffffff;
+
   border-right: 1px solid #eadfd9;
 
   padding: 28px 18px;
@@ -32,31 +31,33 @@
 
 .admin-logo {
   display: flex;
+
   align-items: center;
+
   gap: 10px;
 
   padding: 0 12px 30px;
 }
 
 .admin-logo span {
-  font-size: 30px;
+  font-size: 25px;
 }
 
 .admin-logo h2 {
   margin: 0;
 
-  font-size: 25px;
-  font-weight: 700;
+  font-size: 24px;
+
+  color: #ff6338;
+
+  font-family: Georgia, "Times New Roman", serif;
 }
-
-
-/* =========================================================
-   SIDEBAR NAVIGATION
-   ========================================================= */
 
 .admin-sidebar nav {
   display: flex;
+
   flex-direction: column;
+
   gap: 8px;
 }
 
@@ -64,6 +65,7 @@
   width: 100%;
 
   border: none;
+
   background: transparent;
 
   padding: 13px 15px;
@@ -73,6 +75,7 @@
   text-align: left;
 
   font-family: inherit;
+
   font-size: 15px;
 
   cursor: pointer;
@@ -86,27 +89,28 @@
 
 .admin-sidebar button.active {
   background: #111111;
+
   color: #ffffff;
 }
 
 .admin-sidebar-bottom {
   margin-top: auto;
+
+  padding-top: 20px;
+
+  border-top: 1px solid #eee5e1;
 }
 
-.admin-sidebar-bottom button:hover {
-  background: #fff1ec;
-}
-
-
-/* =========================================================
-   MAIN CONTENT
-   ========================================================= */
+/* =========================
+   MAIN
+========================= */
 
 .admin-main {
   flex: 1;
 
   width: 100%;
-  max-width: 1500px;
+
+  max-width: 1600px;
 
   box-sizing: border-box;
 
@@ -115,87 +119,152 @@
   background: #fff8f5;
 }
 
-
-/* =========================================================
+/* =========================
    HEADER
-   ========================================================= */
+========================= */
 
 .admin-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
 
-  margin-bottom: 35px;
+  align-items: flex-end;
+
+  justify-content: space-between;
+
+  gap: 25px;
+
+  margin-bottom: 30px;
 }
 
-.admin-small-title {
-  margin: 0 0 8px;
+.admin-welcome {
+  margin: 0 0 5px;
 
-  font-size: 12px;
-  font-weight: 700;
+  color: #ff6338;
 
-  letter-spacing: 2px;
+  font-size: 14px;
 
-  color: #8b7770;
+  font-weight: 600;
 }
 
 .admin-header h1 {
-  margin: 0 0 8px;
-
-  font-size: 34px;
-  font-weight: 700;
-
-  color: #111111;
-}
-
-.admin-header p {
   margin: 0;
 
-  color: #766a65;
-  font-size: 15px;
+  color: #111111;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 36px;
 }
 
+.admin-subtitle {
+  margin: 8px 0 0;
 
-/* =========================================================
-   ADD RESTAURANT BUTTON
-   ========================================================= */
+  color: #777;
+
+  font-size: 15px;
+}
 
 .add-restaurant-btn {
   border: none;
 
   background: #111111;
+
   color: #ffffff;
 
   padding: 13px 20px;
 
-  border-radius: 9px;
+  border-radius: 10px;
 
   font-family: inherit;
+
   font-size: 14px;
+
+  font-weight: 600;
 
   cursor: pointer;
 
-  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  transition: 0.2s ease;
 }
 
 .add-restaurant-btn:hover {
   background: #333333;
+
   transform: translateY(-1px);
 }
 
+/* =========================
+   MESSAGES
+========================= */
 
-/* =========================================================
+.admin-success-message,
+.admin-error-message {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 13px 16px;
+
+  border-radius: 10px;
+
+  margin-bottom: 22px;
+
+  font-size: 14px;
+}
+
+.admin-success-message {
+  background: #eef9f0;
+
+  border: 1px solid #cce8d0;
+
+  color: #28743b;
+}
+
+.admin-error-message {
+  background: #fff0ef;
+
+  border: 1px solid #f0c9c5;
+
+  color: #a33a32;
+}
+
+.admin-success-message span {
+  font-weight: 700;
+}
+
+.admin-error-message span {
+  width: 20px;
+  height: 20px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #a33a32;
+
+  color: #ffffff;
+
+  font-size: 12px;
+}
+
+/* =========================
    STATISTICS
-   ========================================================= */
+========================= */
 
 .admin-stats {
   display: grid;
 
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
 
   gap: 20px;
 
-  margin-bottom: 35px;
+  margin-bottom: 32px;
 }
 
 .stat-card {
@@ -203,299 +272,331 @@
 
   border: 1px solid #eadfd9;
 
-  border-radius: 14px;
+  border-radius: 15px;
 
-  padding: 23px;
+  padding: 22px;
 
   display: flex;
+
   align-items: center;
 
-  gap: 18px;
+  gap: 16px;
 
-  box-shadow: 0 3px 15px rgba(80, 50, 40, 0.03);
+  box-sizing: border-box;
 }
 
 .stat-icon {
-  width: 50px;
-  height: 50px;
-
-  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
 
   border-radius: 12px;
 
-  background: #f8efeb;
+  background: #fff1ec;
 
   display: flex;
+
   align-items: center;
   justify-content: center;
 
   font-size: 23px;
+
+  flex-shrink: 0;
 }
 
 .stat-card span {
   display: block;
 
-  color: #766a65;
+  color: #888;
 
   font-size: 13px;
+
+  margin-bottom: 5px;
 }
 
-.stat-card h2 {
-  margin: 5px 0 0;
+.stat-card strong {
+  display: block;
+
+  color: #111;
 
   font-size: 25px;
-
-  color: #111111;
 }
 
-
-/* =========================================================
+/* =========================
    RESTAURANT SECTION
-   ========================================================= */
+========================= */
 
-.admin-restaurant-section {
+.admin-restaurants-section {
   background: #ffffff;
 
   border: 1px solid #eadfd9;
 
-  border-radius: 16px;
+  border-radius: 18px;
 
   overflow: hidden;
-
-  box-shadow: 0 4px 18px rgba(80, 50, 40, 0.03);
 }
 
-
-/* =========================================================
-   SECTION HEADER
-   ========================================================= */
-
 .section-heading {
-  padding: 25px;
+  padding: 25px 25px 22px;
 
   display: flex;
+
   justify-content: space-between;
+
   align-items: center;
 
   border-bottom: 1px solid #eee5e1;
 }
 
 .section-heading h2 {
-  margin: 0 0 5px;
+  margin: 0;
 
-  font-size: 24px;
+  color: #111;
 
-  color: #111111;
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 23px;
 }
 
 .section-heading p {
-  margin: 0;
+  margin: 6px 0 0;
 
-  color: #766a65;
+  color: #888;
 
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.section-heading button {
-  border: none;
+.restaurant-count {
+  background: #fff1ec;
 
-  background: #111111;
-  color: #ffffff;
+  color: #c94d2e;
 
-  padding: 11px 17px;
+  padding: 8px 13px;
 
-  border-radius: 8px;
-
-  font-family: inherit;
-  font-size: 14px;
-
-  cursor: pointer;
-
-  transition: all 0.2s ease;
-}
-
-.section-heading button:hover {
-  background: #333333;
-}
-
-
-/* =========================================================
-   TABLE
-   ========================================================= */
-
-.admin-table-wrapper {
-  width: 100%;
-
-  overflow-x: auto;
-}
-
-.admin-table {
-  width: 100%;
-
-  border-collapse: collapse;
-
-  min-width: 900px;
-}
-
-.admin-table th {
-  background: #fffaf8;
-
-  color: #806f68;
+  border-radius: 20px;
 
   font-size: 12px;
 
-  text-transform: uppercase;
-
-  letter-spacing: 0.6px;
-
-  text-align: left;
-
-  padding: 16px 20px;
+  font-weight: 600;
 
   white-space: nowrap;
 }
 
-.admin-table td {
-  padding: 16px 20px;
+/* =========================
+   TABLE
+========================= */
 
-  border-top: 1px solid #f0e8e4;
-
-  font-size: 14px;
-
-  color: #333333;
-
-  vertical-align: middle;
+.restaurant-table {
+  width: 100%;
 }
 
-.admin-table tbody tr {
+.restaurant-table-header,
+.restaurant-row {
+  display: grid;
+
+  grid-template-columns:
+    2.1fr
+    1.8fr
+    2.6fr
+    0.7fr
+    1.55fr;
+
+  align-items: center;
+
+  column-gap: 18px;
+
+  box-sizing: border-box;
+}
+
+.restaurant-table-header {
+  padding: 14px 20px;
+
+  background: #fffaf8;
+
+  color: #8b7d77;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.3px;
+}
+
+.restaurant-row {
+  padding: 15px 20px;
+
+  border-top: 1px solid #eee5e1;
+
+  min-height: 74px;
+
   transition: background 0.2s ease;
 }
 
-.admin-table tbody tr:hover {
-  background: #fffaf8;
+.restaurant-row:hover {
+  background: #fffcfb;
 }
 
+.restaurant-cell {
+  min-width: 0;
 
-/* =========================================================
-   RESTAURANT NAME CELL
-   ========================================================= */
+  font-size: 13px;
+
+  color: #333;
+}
+
+/* Restaurant */
 
 .restaurant-name-cell {
   display: flex;
+
   align-items: center;
 
   gap: 12px;
 }
 
-.restaurant-name-cell strong {
-  display: block;
+.admin-restaurant-image {
+  width: 58px;
+  height: 58px;
 
-  color: #111111;
-
-  font-size: 14px;
-}
-
-.restaurant-name-cell small {
-  display: block;
-
-  margin-top: 4px;
-
-  color: #999999;
-
-  font-size: 12px;
-}
-
-
-/* =========================================================
-   RESTAURANT IMAGE
-   ========================================================= */
-
-.restaurant-thumb {
-  width: 55px;
-  height: 55px;
-
-  flex-shrink: 0;
-
-  border-radius: 10px;
+  border-radius: 11px;
 
   overflow: hidden;
 
-  background: #f5eeeb;
+  flex-shrink: 0;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 22px;
+  background: #f6efec;
 }
 
-.restaurant-thumb img {
+.admin-restaurant-image img {
   width: 100%;
   height: 100%;
 
-  object-fit: cover;
-
   display: block;
+
+  object-fit: cover;
 }
 
+.no-image {
+  width: 100%;
+  height: 100%;
 
-/* =========================================================
-   RATING
-   ========================================================= */
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 23px;
+}
+
+.restaurant-name-cell h3 {
+  margin: 0 0 4px;
+
+  color: #222;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 14px;
+
+  line-height: 1.25;
+}
+
+.restaurant-name-cell span {
+  color: #999;
+
+  font-size: 11px;
+}
+
+/* Location */
+
+.location-cell {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 7px;
+
+  line-height: 1.4;
+}
+
+.cell-icon {
+  flex-shrink: 0;
+
+  font-size: 13px;
+}
+
+/* Cuisine */
+
+.cuisine-cell {
+  line-height: 1.45;
+
+  max-height: 45px;
+
+  overflow: hidden;
+}
+
+/* Rating */
 
 .rating-badge {
   display: inline-flex;
+
   align-items: center;
 
-  gap: 3px;
+  gap: 4px;
 
-  background: #fff7d9;
+  background: #fff7d8;
 
-  color: #594900;
+  color: #8c6d00;
 
-  padding: 6px 9px;
+  padding: 8px 10px;
 
-  border-radius: 7px;
+  border-radius: 9px;
 
-  font-size: 13px;
+  font-size: 12px;
 
-  white-space: nowrap;
+  font-weight: 600;
 }
 
+/* =========================
+   ACTIONS
+========================= */
 
-/* =========================================================
-   ACTION BUTTONS
-   ========================================================= */
-
-.action-buttons {
+.action-cell {
   display: flex;
+
+  align-items: center;
 
   gap: 7px;
 }
 
-.action-buttons button {
+.view-btn,
+.edit-btn,
+.delete-btn {
   border: none;
 
-  padding: 8px 12px;
+  padding: 9px 12px;
 
-  border-radius: 7px;
+  border-radius: 8px;
 
   font-family: inherit;
-  font-size: 13px;
+
+  font-size: 12px;
+
+  font-weight: 600;
 
   cursor: pointer;
 
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
 }
 
 .view-btn {
-  background: #f1eeee;
+  background: #f1efee;
 
-  color: #222222;
+  color: #333;
 }
 
 .view-btn:hover {
-  background: #e5dfdc;
+  background: #e4e0de;
 }
 
 .edit-btn {
@@ -508,117 +609,378 @@
   background: #333333;
 }
 
+.delete-btn {
+  background: #fff0ef;
 
-/* =========================================================
+  color: #a33a32;
+}
+
+.delete-btn:hover {
+  background: #fbdedb;
+}
+
+/* =========================
    LOADING
-   ========================================================= */
+========================= */
 
 .admin-loading {
-  padding: 60px;
+  min-height: 280px;
 
-  text-align: center;
+  display: flex;
 
-  color: #766a65;
+  flex-direction: column;
 
-  font-size: 15px;
+  align-items: center;
+  justify-content: center;
+
+  color: #888;
+
+  font-size: 14px;
 }
 
+.loading-spinner {
+  width: 30px;
+  height: 30px;
 
-/* =========================================================
+  border: 3px solid #eee2dd;
+
+  border-top-color: #111111;
+
+  border-radius: 50%;
+
+  animation: spin 0.8s linear infinite;
+
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
    EMPTY STATE
-   ========================================================= */
+========================= */
 
 .admin-empty {
-  padding: 70px 20px;
+  padding: 70px 30px;
 
   text-align: center;
 }
 
-.admin-empty > div {
+.empty-icon {
   font-size: 45px;
 
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .admin-empty h3 {
-  margin: 0 0 8px;
+  margin: 0;
 
-  font-size: 19px;
+  color: #333;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 22px;
 }
 
 .admin-empty p {
-  margin: 0;
+  color: #888;
 
-  color: #766a65;
+  font-size: 14px;
+
+  margin: 8px 0 20px;
 }
 
 .admin-empty button {
-  margin-top: 18px;
-
   border: none;
 
   background: #111111;
+
   color: #ffffff;
 
-  padding: 11px 18px;
+  padding: 12px 20px;
 
-  border-radius: 8px;
+  border-radius: 9px;
 
   font-family: inherit;
+
+  font-weight: 600;
 
   cursor: pointer;
 }
 
-.admin-empty button:hover {
-  background: #333333;
+/* =========================
+   DELETE MODAL
+========================= */
+
+.delete-modal-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 9999;
+
+  background: rgba(20, 15, 13, 0.45);
+
+  backdrop-filter: blur(3px);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  box-sizing: border-box;
 }
 
+.delete-modal {
+  width: 100%;
 
-/* =========================================================
-   RESPONSIVE - TABLET
-   ========================================================= */
+  max-width: 450px;
 
-@media (max-width: 1000px) {
+  background: #ffffff;
 
+  border-radius: 18px;
+
+  padding: 32px;
+
+  box-sizing: border-box;
+
+  text-align: center;
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.18);
+
+  animation: modalAppear 0.2s ease;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+
+    transform: translateY(10px)
+      scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0)
+      scale(1);
+  }
+}
+
+.delete-modal-icon {
+  width: 60px;
+  height: 60px;
+
+  margin: 0 auto 18px;
+
+  border-radius: 50%;
+
+  background: #fff0ef;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 27px;
+}
+
+.delete-modal h2 {
+  margin: 0 0 10px;
+
+  color: #222;
+
+  font-family: Georgia, "Times New Roman", serif;
+
+  font-size: 24px;
+}
+
+.delete-modal p {
+  margin: 0 auto 8px;
+
+  color: #666;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+
+  max-width: 350px;
+}
+
+.delete-modal p strong {
+  color: #222;
+}
+
+.delete-warning {
+  display: block;
+
+  color: #a33a32;
+
+  font-size: 12px;
+
+  margin-bottom: 25px;
+}
+
+/* Modal Buttons */
+
+.delete-modal-actions {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 10px;
+}
+
+.modal-cancel-btn,
+.modal-delete-btn {
+  border: none;
+
+  padding: 12px 20px;
+
+  border-radius: 9px;
+
+  font-family: inherit;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.modal-cancel-btn {
+  background: #f1eeec;
+
+  color: #333;
+}
+
+.modal-cancel-btn:hover {
+  background: #e4dfdc;
+}
+
+.modal-delete-btn {
+  background: #c0392b;
+
+  color: #ffffff;
+}
+
+.modal-delete-btn:hover {
+  background: #a93226;
+}
+
+.modal-cancel-btn:disabled,
+.modal-delete-btn:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1200px) {
+  .admin-main {
+    padding: 30px;
+  }
+
+  .restaurant-table-header,
+  .restaurant-row {
+    grid-template-columns:
+      1.8fr
+      1.5fr
+      2fr
+      0.7fr
+      1.7fr;
+
+    column-gap: 12px;
+  }
+
+  .action-cell {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 950px) {
   .admin-sidebar {
     width: 210px;
   }
 
   .admin-main {
-    padding: 30px;
+    padding: 25px;
   }
 
   .admin-stats {
     grid-template-columns: 1fr;
   }
 
+  .restaurant-table {
+    overflow-x: auto;
+  }
+
+  .restaurant-table-header,
+  .restaurant-row {
+    min-width: 950px;
+  }
 }
 
-
-/* =========================================================
-   RESPONSIVE - MOBILE
-   ========================================================= */
-
 @media (max-width: 700px) {
+  .admin-dashboard {
+    display: block;
+  }
 
   .admin-sidebar {
-    display: none;
+    width: 100%;
+
+    min-height: auto;
+
+    position: relative;
+
+    border-right: none;
+
+    border-bottom: 1px solid #eadfd9;
+
+    padding: 18px;
+  }
+
+  .admin-logo {
+    padding-bottom: 18px;
+  }
+
+  .admin-sidebar nav {
+    flex-direction: row;
+
+    overflow-x: auto;
+  }
+
+  .admin-sidebar nav button {
+    white-space: nowrap;
+
+    width: auto;
+  }
+
+  .admin-sidebar-bottom {
+    margin-top: 12px;
+
+    padding-top: 12px;
   }
 
   .admin-main {
-    padding: 20px 15px;
+    padding: 20px;
   }
 
   .admin-header {
     flex-direction: column;
 
     align-items: flex-start;
-
-    gap: 20px;
-  }
-
-  .admin-header h1 {
-    font-size: 28px;
   }
 
   .add-restaurant-btn {
@@ -626,15 +988,33 @@
   }
 
   .section-heading {
-    flex-direction: column;
-
     align-items: flex-start;
 
     gap: 15px;
+
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-main {
+    padding: 15px;
   }
 
-  .section-heading button {
+  .admin-header h1 {
+    font-size: 29px;
+  }
+
+  .delete-modal {
+    padding: 25px 20px;
+  }
+
+  .delete-modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-cancel-btn,
+  .modal-delete-btn {
     width: 100%;
   }
-
 }

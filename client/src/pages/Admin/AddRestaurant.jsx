@@ -19,11 +19,13 @@ function AddRestaurant() {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
 
+  const [isDragging, setIsDragging] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  // Get categories
+  // Load categories
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/categories/")
       .then((response) => {
@@ -36,12 +38,13 @@ function AddRestaurant() {
       .then((data) => {
         setCategories(data);
       })
-      .catch((error) => {
-        console.error("Category error:", error);
+      .catch((err) => {
+        console.error(err);
         setError("Unable to load categories.");
       });
   }, []);
 
+  // Handle normal form inputs
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -51,17 +54,71 @@ function AddRestaurant() {
     }));
   };
 
-  const handleImageChange = (event) => {
-    const selectedImage = event.target.files[0];
-
+  // Validate and select image
+  const handleImageSelect = (selectedImage) => {
     if (!selectedImage) {
       return;
     }
 
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(selectedImage.type)) {
+      setError("Please upload JPG, JPEG, PNG or WEBP image.");
+      return;
+    }
+
+    if (selectedImage.size > 5 * 1024 * 1024) {
+      setError("Image size must be less than 5MB.");
+      return;
+    }
+
     setImage(selectedImage);
-    setPreview(URL.createObjectURL(selectedImage));
+
+    const imageUrl = URL.createObjectURL(selectedImage);
+    setPreview(imageUrl);
+
+    setError("");
+    setMessage("");
   };
 
+  // Normal file selection
+  const handleImageChange = (event) => {
+    handleImageSelect(event.target.files[0]);
+  };
+
+  // Drag over
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  // Drag leave
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  // Drop image
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setIsDragging(false);
+
+    const droppedFile = event.dataTransfer.files[0];
+
+    handleImageSelect(droppedFile);
+  };
+
+  // Remove selected image
+  const removeImage = () => {
+    setImage(null);
+    setPreview(null);
+  };
+
+  // Submit form
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -95,243 +152,247 @@ function AddRestaurant() {
 
       if (!response.ok) {
         throw new Error(
-          result.detail || "Failed to add restaurant"
+          result.detail || "Failed to add restaurant."
         );
       }
 
-      setMessage("Restaurant added successfully! 🍽️");
+      setMessage("Restaurant added successfully!");
 
+      // Go back to admin dashboard
       setTimeout(() => {
         navigate("/admin");
       }, 1000);
-    } catch (error) {
-      console.error("Add restaurant error:", error);
-      setError(error.message);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="admin-form-page">
-
-      <div className="admin-form-container">
+    <div className="add-restaurant-page">
+      <div className="add-restaurant-container">
 
         {/* Header */}
-
-        <div className="form-header">
-
-          <div>
-            <p className="form-label">
-              ZESTHUB ADMIN
-            </p>
-
-            <h1>Add Restaurant</h1>
-
-            <p>
-              Add a new restaurant to ZestHub.
-            </p>
-          </div>
-
+        <div className="add-page-header">
           <button
-            className="back-btn"
+            className="back-button"
             onClick={() => navigate("/admin")}
           >
             ← Back to Dashboard
           </button>
 
+          <div>
+            <h1>Add Restaurant</h1>
+            <p>
+              Add a new restaurant to the ZestHub platform.
+            </p>
+          </div>
         </div>
 
         {/* Form */}
-
         <form
-          className="restaurant-form"
+          className="add-restaurant-form"
           onSubmit={handleSubmit}
         >
 
-          <div className="form-grid">
+          {/* Restaurant Name */}
+          <div className="form-group">
+            <label htmlFor="name">
+              Restaurant Name
+            </label>
 
-            {/* Restaurant Name */}
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Enter restaurant name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            <div className="form-group full-width">
+          {/* Location */}
+          <div className="form-group">
+            <label htmlFor="location">
+              Location
+            </label>
 
-              <label>
-                Restaurant Name
-              </label>
+            <input
+              type="text"
+              id="location"
+              name="location"
+              placeholder="Enter restaurant location"
+              value={formData.location}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          {/* Cuisine */}
+          <div className="form-group">
+            <label htmlFor="cuisine">
+              Cuisine
+            </label>
+
+            <input
+              type="text"
+              id="cuisine"
+              name="cuisine"
+              placeholder="Example: South Indian, Chinese"
+              value={formData.cuisine}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          {/* Rating */}
+          <div className="form-group">
+            <label htmlFor="rating">
+              Rating
+            </label>
+
+            <input
+              type="number"
+              id="rating"
+              name="rating"
+              placeholder="Example: 4.5"
+              min="0"
+              max="5"
+              step="0.1"
+              value={formData.rating}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          {/* Category */}
+          <div className="form-group">
+            <label htmlFor="category_id">
+              Category
+            </label>
+
+            <select
+              id="category_id"
+              name="category_id"
+              value={formData.category_id}
+              onChange={handleChange}
+              required
+            >
+              <option value="">
+                Select Category
+              </option>
+
+              {categories.map((category) => (
+                <option
+                  key={category.id}
+                  value={category.id}
+                >
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Description */}
+          <div className="form-group full-width">
+            <label htmlFor="description">
+              Description
+            </label>
+
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Enter restaurant description"
+              value={formData.description}
+              onChange={handleChange}
+              rows="5"
+            />
+          </div>
+
+          {/* IMAGE UPLOAD */}
+          <div className="form-group full-width">
+            <label>
+              Restaurant Image
+            </label>
+
+            <div className="image-upload">
 
               <input
-                type="text"
-                name="name"
-                placeholder="Enter restaurant name"
-                value={formData.name}
-                onChange={handleChange}
-                required
+                type="file"
+                id="restaurant-image"
+                accept=".jpg,.jpeg,.png,.webp"
+                onChange={handleImageChange}
               />
 
-            </div>
-
-            {/* Location */}
-
-            <div className="form-group">
-
-              <label>
-                Location
-              </label>
-
-              <input
-                type="text"
-                name="location"
-                placeholder="Example: Thillai Nagar, Trichy"
-                value={formData.location}
-                onChange={handleChange}
-                required
-              />
-
-            </div>
-
-            {/* Cuisine */}
-
-            <div className="form-group">
-
-              <label>
-                Cuisine
-              </label>
-
-              <input
-                type="text"
-                name="cuisine"
-                placeholder="Example: South Indian, Biryani"
-                value={formData.cuisine}
-                onChange={handleChange}
-                required
-              />
-
-            </div>
-
-            {/* Category */}
-
-            <div className="form-group">
-
-              <label>
-                Category
-              </label>
-
-              <select
-                name="category_id"
-                value={formData.category_id}
-                onChange={handleChange}
-                required
+              <label
+                htmlFor="restaurant-image"
+                className={`upload-box ${
+                  isDragging ? "dragging" : ""
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
               >
 
-                <option value="">
-                  Select Category
-                </option>
+                {preview ? (
+                  <div className="image-preview-wrapper">
 
-                {categories.map((category) => (
-                  <option
-                    key={category.id}
-                    value={category.id}
-                  >
-                    {category.name}
-                  </option>
-                ))}
-
-              </select>
-
-            </div>
-
-            {/* Rating */}
-
-            <div className="form-group">
-
-              <label>
-                Rating
-              </label>
-
-              <input
-                type="number"
-                name="rating"
-                min="0"
-                max="5"
-                step="0.1"
-                placeholder="Example: 4.5"
-                value={formData.rating}
-                onChange={handleChange}
-              />
-
-            </div>
-
-            {/* Description */}
-
-            <div className="form-group full-width">
-
-              <label>
-                Description
-              </label>
-
-              <textarea
-                name="description"
-                rows="5"
-                placeholder="Enter restaurant description"
-                value={formData.description}
-                onChange={handleChange}
-              />
-
-            </div>
-
-            {/* Image */}
-
-            <div className="form-group full-width">
-
-              <label>
-                Restaurant Image
-              </label>
-
-              <div className="image-upload">
-
-                <input
-                  type="file"
-                  id="restaurant-image"
-                  accept=".jpg,.jpeg,.png,.webp"
-                  onChange={handleImageChange}
-                />
-
-                <label
-                  htmlFor="restaurant-image"
-                  className="upload-box"
-                >
-
-                  {preview ? (
                     <img
                       src={preview}
                       alt="Restaurant preview"
                     />
-                  ) : (
-                    <>
-                      <span className="upload-icon">
-                        📷
-                      </span>
 
+                    <div className="image-overlay">
+                      <span>📷</span>
                       <strong>
-                        Choose Restaurant Image
+                        Drag or Click to Change
                       </strong>
+                    </div>
 
-                      <small>
-                        JPG, JPEG, PNG or WEBP
-                      </small>
-                    </>
-                  )}
+                  </div>
+                ) : (
+                  <>
+                    <span className="upload-icon">
+                      📷
+                    </span>
 
-                </label>
+                    <strong>
+                      Drag & Drop Restaurant Image
+                    </strong>
 
-              </div>
+                    <span className="upload-or">
+                      or
+                    </span>
+
+                    <span className="browse-text">
+                      Click to Browse
+                    </span>
+
+                    <small>
+                      JPG • JPEG • PNG • WEBP • Max 5MB
+                    </small>
+                  </>
+                )}
+
+              </label>
+
+              {preview && (
+                <button
+                  type="button"
+                  className="remove-image-btn"
+                  onClick={removeImage}
+                >
+                  ✕ Remove Image
+                </button>
+              )}
 
             </div>
-
           </div>
 
           {/* Messages */}
-
           {message && (
             <div className="success-message">
               {message}
@@ -345,12 +406,11 @@ function AddRestaurant() {
           )}
 
           {/* Buttons */}
-
           <div className="form-actions">
 
             <button
               type="button"
-              className="cancel-btn"
+              className="cancel-button"
               onClick={() => navigate("/admin")}
             >
               Cancel
@@ -358,20 +418,18 @@ function AddRestaurant() {
 
             <button
               type="submit"
-              className="save-btn"
+              className="submit-button"
               disabled={loading}
             >
               {loading
-                ? "Adding..."
+                ? "Adding Restaurant..."
                 : "Add Restaurant"}
             </button>
 
           </div>
 
         </form>
-
       </div>
-
     </div>
   );
 }

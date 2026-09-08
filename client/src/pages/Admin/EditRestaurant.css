@@ -1,201 +1,158 @@
-/* =========================================================
-   ZESTHUB EDIT RESTAURANT
-   ========================================================= */
-
-.edit-page {
-  min-height: calc(100vh - 70px);
-
+.edit-restaurant-page {
+  min-height: 100vh;
   background: #fff8f5;
-
-  padding: 45px;
+  padding: 40px;
+  box-sizing: border-box;
 }
 
-.edit-container {
-  max-width: 1000px;
-
+.edit-restaurant-container {
+  max-width: 1100px;
   margin: 0 auto;
 }
 
+/* Header */
 
-/* =========================================================
-   HEADER
-   ========================================================= */
-
-.edit-header {
-  display: flex;
-
-  justify-content: space-between;
-  align-items: flex-start;
-
+.edit-page-header {
   margin-bottom: 30px;
 }
 
-.edit-label {
-  margin: 0 0 8px;
-
-  font-size: 12px;
-
-  font-weight: 700;
-
-  letter-spacing: 2px;
-
-  color: #8b7770;
-}
-
-.edit-header h1 {
-  margin: 0 0 8px;
-
-  font-size: 34px;
-
-  color: #111111;
-}
-
-.edit-header p {
-  color: #766a65;
-
-  margin: 0;
-}
-
-
-/* =========================================================
-   BACK BUTTON
-   ========================================================= */
-
-.edit-back-btn {
-  border: 1px solid #ddd1cc;
-
-  background: #ffffff;
-
-  color: #333333;
-
-  padding: 11px 17px;
-
-  border-radius: 9px;
+.edit-back-button {
+  border: none;
+  background: transparent;
 
   font-family: inherit;
-
   font-size: 14px;
 
   cursor: pointer;
 
-  transition: 0.2s;
+  margin-bottom: 18px;
+  padding: 0;
 }
 
-.edit-back-btn:hover {
-  background: #fff1ec;
+.edit-back-button:hover {
+  text-decoration: underline;
 }
 
+.edit-page-header h1 {
+  margin: 0;
 
-/* =========================================================
-   FORM
-   ========================================================= */
+  font-size: 32px;
+  color: #111;
+}
 
-.edit-form {
+.edit-page-header p {
+  margin-top: 8px;
+
+  color: #777;
+  font-size: 15px;
+}
+
+/* Loading */
+
+.edit-loading {
+  min-height: 70vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+  color: #555;
+}
+
+/* Form */
+
+.edit-restaurant-form {
   background: #ffffff;
 
   border: 1px solid #eadfd9;
-
   border-radius: 18px;
 
-  padding: 32px;
+  padding: 35px;
 
-  box-shadow:
-    0 5px 20px rgba(80, 50, 40, 0.04);
-}
-
-.edit-grid {
   display: grid;
-
   grid-template-columns: 1fr 1fr;
 
-  gap: 23px;
+  gap: 24px;
+
+  box-sizing: border-box;
+
+  box-shadow: 0 8px 30px rgba(80, 50, 40, 0.04);
 }
 
 .edit-group {
   display: flex;
-
   flex-direction: column;
 }
 
-.full-width {
+.edit-group.full-width {
   grid-column: 1 / -1;
 }
 
 .edit-group label {
   font-size: 14px;
-
   font-weight: 600;
 
+  color: #333;
+
   margin-bottom: 8px;
-
-  color: #222222;
 }
-
-
-/* =========================================================
-   INPUTS
-   ========================================================= */
 
 .edit-group input,
 .edit-group select,
 .edit-group textarea {
   width: 100%;
-
   box-sizing: border-box;
 
-  border: 1px solid #ddd2cd;
-
-  border-radius: 9px;
+  border: 1px solid #ded3ce;
+  border-radius: 10px;
 
   padding: 13px 14px;
 
-  background: #ffffff;
-
-  color: #222222;
-
   font-family: inherit;
-
   font-size: 14px;
 
   outline: none;
 
-  transition: border 0.2s;
+  background: #fff;
+
+  transition: 0.2s ease;
 }
 
 .edit-group input:focus,
 .edit-group select:focus,
 .edit-group textarea:focus {
-  border-color: #111111;
+  border-color: #111;
+
+  box-shadow:
+    0 0 0 3px rgba(17, 17, 17, 0.05);
 }
 
 .edit-group textarea {
   resize: vertical;
+  min-height: 120px;
 }
 
-
-/* =========================================================
-   IMAGE UPLOAD
-   ========================================================= */
+/* IMAGE UPLOAD */
 
 .edit-image-upload input {
   display: none;
 }
 
 .edit-upload-box {
-  height: 270px;
+  width: 100%;
+  height: 280px;
+  box-sizing: border-box;
 
   border: 2px dashed #d9cbc5;
-
   border-radius: 14px;
 
   background: #fffaf8;
 
   display: flex;
-
   flex-direction: column;
 
   justify-content: center;
-
   align-items: center;
 
   cursor: pointer;
@@ -204,34 +161,68 @@
 
   text-align: center;
 
-  transition: 0.2s;
+  transition: all 0.25s ease;
 }
 
 .edit-upload-box:hover {
   background: #fff5f1;
-
   border-color: #b9aaa3;
 }
 
-.edit-upload-box span {
-  font-size: 42px;
+.edit-upload-box.dragging {
+  background: #fff0ea;
 
-  margin-bottom: 10px;
+  border-color: #111;
+  border-style: solid;
+
+  transform: scale(1.01);
+}
+
+.edit-upload-icon {
+  font-size: 45px;
+  margin-bottom: 12px;
 }
 
 .edit-upload-box strong {
-  font-size: 15px;
+  font-size: 16px;
+  color: #222;
+}
+
+.edit-upload-or {
+  margin: 8px 0 5px;
+
+  color: #999;
+  font-size: 13px;
+}
+
+.edit-browse-text {
+  color: #111;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  text-decoration: underline;
 }
 
 .edit-upload-box small {
-  margin-top: 6px;
+  margin-top: 12px;
 
   color: #8b7d77;
+
+  font-size: 12px;
 }
 
-.edit-upload-box img {
-  width: 100%;
+/* Preview */
 
+.edit-image-preview-wrapper {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+}
+
+.edit-image-preview-wrapper img {
+  width: 100%;
   height: 100%;
 
   object-fit: cover;
@@ -239,203 +230,180 @@
   display: block;
 }
 
-.new-image-text {
-  margin-top: 8px;
+.edit-image-overlay {
+  position: absolute;
 
-  color: #766a65;
+  inset: 0;
 
-  font-size: 13px;
+  background: rgba(0, 0, 0, 0.45);
+
+  color: #fff;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  opacity: 0;
+
+  transition: opacity 0.25s ease;
 }
 
+.edit-image-preview-wrapper:hover
+  .edit-image-overlay {
+  opacity: 1;
+}
 
-/* =========================================================
-   SUCCESS / ERROR
-   ========================================================= */
+.edit-image-overlay span {
+  font-size: 30px;
 
-.edit-success {
-  margin-top: 20px;
+  margin-bottom: 5px;
+}
 
-  padding: 13px;
+.edit-image-overlay strong {
+  color: #fff;
 
-  border-radius: 9px;
+  font-size: 14px;
+}
 
-  background: #eef8ee;
+/* Remove image */
 
-  color: #2e6b32;
+.edit-remove-image-btn {
+  margin-top: 10px;
+
+  border: none;
+  background: transparent;
+
+  color: #a33a32;
+
+  font-family: inherit;
+  font-size: 13px;
+
+  cursor: pointer;
+}
+
+.edit-remove-image-btn:hover {
+  text-decoration: underline;
+}
+
+/* Messages */
+
+.edit-success-message {
+  grid-column: 1 / -1;
+
+  padding: 12px 15px;
+
+  background: #eef9f0;
+
+  border: 1px solid #cce8d0;
+
+  color: #28743b;
+
+  border-radius: 10px;
 
   font-size: 14px;
 }
 
 .edit-error-message {
-  margin-top: 20px;
+  grid-column: 1 / -1;
 
-  padding: 13px;
-
-  border-radius: 9px;
+  padding: 12px 15px;
 
   background: #fff0ef;
 
+  border: 1px solid #f0c9c5;
+
   color: #a33a32;
+
+  border-radius: 10px;
 
   font-size: 14px;
 }
 
+/* Buttons */
 
-/* =========================================================
-   ACTIONS
-   ========================================================= */
+.edit-form-actions {
+  grid-column: 1 / -1;
 
-.edit-actions {
   display: flex;
 
   justify-content: flex-end;
 
   gap: 12px;
 
-  margin-top: 30px;
-
-  padding-top: 25px;
-
-  border-top: 1px solid #eee5e1;
+  margin-top: 10px;
 }
 
-.edit-cancel-btn,
-.edit-save-btn {
-  padding: 12px 22px;
-
-  border-radius: 9px;
-
-  font-family: inherit;
-
-  font-size: 14px;
-
-  cursor: pointer;
-}
-
-.edit-cancel-btn {
-  border: 1px solid #ddd2cd;
-
-  background: #ffffff;
-
-  color: #333333;
-}
-
-.edit-cancel-btn:hover {
-  background: #fff5f1;
-}
-
-.edit-save-btn {
+.edit-cancel-button,
+.edit-submit-button {
   border: none;
 
-  background: #111111;
+  border-radius: 10px;
 
-  color: #ffffff;
+  padding: 13px 22px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
 }
 
-.edit-save-btn:hover {
-  background: #333333;
+.edit-cancel-button {
+  background: #f2ece9;
+
+  color: #333;
 }
 
-.edit-save-btn:disabled {
+.edit-cancel-button:hover {
+  background: #e8dfdb;
+}
+
+.edit-submit-button {
+  background: #111;
+
+  color: #fff;
+}
+
+.edit-submit-button:hover {
+  background: #2b2b2b;
+}
+
+.edit-submit-button:disabled {
   opacity: 0.6;
 
   cursor: not-allowed;
 }
 
+/* Responsive */
 
-/* =========================================================
-   LOADING
-   ========================================================= */
-
-.edit-loading {
-  min-height: 60vh;
-
-  display: flex;
-
-  justify-content: center;
-  align-items: center;
-
-  color: #766a65;
-
-  font-size: 15px;
-}
-
-
-/* =========================================================
-   ERROR PAGE
-   ========================================================= */
-
-.edit-error {
-  max-width: 600px;
-
-  margin: 100px auto;
-
-  padding: 40px;
-
-  background: #ffffff;
-
-  border: 1px solid #eadfd9;
-
-  border-radius: 16px;
-
-  text-align: center;
-}
-
-.edit-error h2 {
-  margin-top: 0;
-}
-
-.edit-error p {
-  color: #766a65;
-}
-
-.edit-error button {
-  margin-top: 15px;
-
-  border: none;
-
-  background: #111111;
-
-  color: #ffffff;
-
-  padding: 11px 18px;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 700px) {
-
-  .edit-page {
-    padding: 25px 15px;
-  }
-
-  .edit-header {
-    flex-direction: column;
-
-    gap: 20px;
-  }
-
-  .edit-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .full-width {
-    grid-column: auto;
-  }
-
-  .edit-form {
+@media (max-width: 768px) {
+  .edit-restaurant-page {
     padding: 20px;
   }
 
-  .edit-upload-box {
-    height: 220px;
+  .edit-restaurant-form {
+    grid-template-columns: 1fr;
+
+    padding: 22px;
   }
 
+  .edit-group.full-width {
+    grid-column: auto;
+  }
+
+  .edit-form-actions {
+    grid-column: auto;
+
+    flex-direction: column;
+  }
+
+  .edit-cancel-button,
+  .edit-submit-button {
+    width: 100%;
+  }
 }
