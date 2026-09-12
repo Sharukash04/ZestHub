@@ -2,106 +2,171 @@
 
 ## Project
 
-**ZestHub – Restaurant Discovery and Food Platform**
+**ZestHub - Restaurant Discovery & Review Platform**
+
+**Project Idea ID:** 101
 
 ---
 
-# Date
-
-## 02-08-2026
-
-### Completed
-
-- Initialized React frontend.
-- Created reusable Navbar component.
-- Created Hero section component.
-- Applied component-specific CSS.
-- Organized React project structure.
-- Learned React component architecture.
-- Created the initial ZestHub landing page.
-- Added food-related visual design and restaurant UI elements.
-
----
-
-# Date
-
-## 03-08-2026 – 07-08-2026
-
-### Completed
-
-- Improved ZestHub landing page design.
-- Added restaurant section.
-- Created restaurant cards.
-- Added restaurant images and information.
-- Implemented React Router.
-- Created restaurant details route.
-- Worked on `/restaurant/:id` routing.
-- Fixed frontend routing issues.
-- Improved reusable React components.
-- Continued UI development for the ZestHub platform.
-
----
-
-# Date
-
-## 10-08-2026
-
-### Backend Development Started
-
-- Created ZestHub backend using FastAPI.
-- Created `server` directory.
-- Created Python virtual environment.
-- Configured backend project structure.
-- Installed backend dependencies.
-- Started PostgreSQL database setup.
-- Created FastAPI application entry point.
-- Started designing backend architecture.
-
-### Backend Structure
-
-```text
-server/
-│
-├── app/
-│   ├── main.py
-│   ├── database.py
-│   ├── models.py
-│   ├── auth.py
-│   │
-│   └── routes/
-│
-├── .env
-├── requirements.txt
-└── test_db.py
-
+# Phase 1 - Foundation
 
 ## Date
 
-07-09-2026
+02-08-2026
 
 ## Completed
 
-- Added real Trichy restaurant data
-- Added 11 restaurant records
-- Implemented restaurant image upload using FastAPI
-- Added multipart/form-data support
-- Installed python-multipart
-- Created restaurant image upload directory
-- Added static serving for uploaded images
-- Updated React FeaturedRestaurants image handling
-- Successfully uploaded a restaurant image
-- Successfully retrieved uploaded image with HTTP 200
-- Verified PostgreSQL is running
-- Verified FastAPI restaurant API
-- Verified Swagger API
-- Confirmed React ↔ FastAPI ↔ PostgreSQL integration
+- Initialized React frontend
+- Created reusable Navbar component
+- Created Hero section component
+- Created Featured Restaurants section
+- Created Trending Restaurants section
+- Applied component-specific CSS
+- Organized React project structure
+- Learned React component architecture
 
-## Next Planned
+---
 
-- Create Admin/Restaurant Owner interface
-- Add Restaurant form in React
-- Add image selection in React
-- Connect Add Restaurant form to FastAPI
-- Implement Edit Restaurant
-- Implement Delete Restaurant
-- Continue restaurant search and filters
+## Date
+
+03-08-2026 to 10-08-2026
+
+## Completed
+
+- Created restaurant listing page
+- Created restaurant details page
+- Added restaurant cards
+- Added restaurant navigation
+- Added dynamic restaurant details using restaurant ID
+- Fixed React Router restaurant routes
+- Improved restaurant UI and styling
+- Connected frontend restaurant pages with backend API
+
+---
+
+## Date
+
+10-08-2026 to 12-08-2026
+
+## Completed
+
+### Backend Foundation
+
+- Created FastAPI backend
+- Organized backend using routers
+- Created database configuration
+- Connected FastAPI with PostgreSQL
+- Created SQLAlchemy models
+- Created restaurant API
+- Created category API
+- Tested backend API using browser and terminal
+- Verified PostgreSQL database connection
+
+### Database
+
+- Installed PostgreSQL
+- Created `zesthub` database
+- Created users table
+- Created restaurants table
+- Created categories table
+- Created reviews table
+- Created ratings table
+- Created favorites table
+- Added relationships between database tables
+
+---
+
+# Phase 2 - Restaurant Platform
+
+## Date
+
+11-08-2026 to 20-08-2026
+
+## Completed
+
+### Restaurant Management
+
+- Created Admin Dashboard
+- Added restaurant management interface
+- Added Add Restaurant functionality
+- Added Edit Restaurant functionality
+- Added Delete Restaurant functionality
+- Added restaurant image upload
+- Added restaurant image storage through FastAPI
+- Added `/uploads` static file serving
+- Connected restaurant images with PostgreSQL records
+- Added restaurant categories
+
+### Restaurant Details
+
+- Created dynamic Restaurant Details page
+- Added restaurant name
+- Added restaurant location
+- Added cuisine information
+- Added restaurant rating
+- Added restaurant description
+- Added restaurant image
+- Connected Restaurant Details page with backend data
+
+---
+
+# Phase 3 - Authentication
+
+## Date
+
+20-08-2026 to 24-08-2026
+
+## Completed
+
+### Authentication Backend
+
+- Created user authentication system
+- Added password hashing
+- Added password verification
+- Added JWT authentication
+- Added access token generation
+- Added protected API authentication
+- Added current-user authentication dependency
+- Added user roles
+- Added `user`, `owner`, and `admin` role structure
+- Added admin authorization foundation
+- Added owner authorization foundation
+
+### User Database
+
+Added authentication fields:
+
+- `role`
+- `is_verified`
+- `verification_token`
+- `verification_token_expires`
+
+### Authentication API
+
+Created:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `GET /api/auth/verify-email`
+
+---
+
+# Date
+
+24-08-2026
+
+## Completed
+
+### Frontend Authentication
+
+Created:
+
+```text
+src/pages/Auth/
+├── Login.jsx
+├── Login.css
+├── Register.jsx
+├── Register.css
+├── VerifyEmail.jsx
+└── VerifyEmail.css

@@ -11,54 +11,58 @@ function Login() {
     password: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (event) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [event.target.name]: event.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
+    setMessage("");
     setError("");
-    setSuccess("");
-
-    if (!formData.email || !formData.password) {
-      setError("Please enter your email and password.");
-      return;
-    }
+    setLoading(true);
 
     try {
-      setLoading(true);
-
       const response = await axios.post(
         "http://127.0.0.1:8000/api/auth/login",
-        formData
+        {
+          email: formData.email.trim().toLowerCase(),
+          password: formData.password,
+        }
       );
 
-      const { access_token, user } = response.data;
+      localStorage.setItem(
+        "zesthub_token",
+        response.data.access_token
+      );
 
-      // Store authentication information
-      localStorage.setItem("zesthub_token", access_token);
-      localStorage.setItem("zesthub_user", JSON.stringify(user));
+      localStorage.setItem(
+        "zesthub_user",
+        JSON.stringify(response.data.user)
+      );
 
-      setSuccess("Login successful! Welcome to ZestHub 🍽️");
+      setMessage("Login successful! Welcome to ZestHub 🍽️");
 
-      // Redirect to home
       setTimeout(() => {
-        navigate("/");
-        window.location.reload();
-      }, 800);
-    } catch (err) {
-      if (err.response?.data?.detail) {
-        setError(err.response.data.detail);
+        navigate("/dashboard");
+      }, 500);
+
+    } catch (error) {
+      console.error("Login error:", error);
+
+      if (error.response?.data?.detail) {
+        setError(error.response.data.detail);
       } else {
-        setError("Unable to connect to ZestHub server.");
+        setError(
+          "Unable to login. Please check your email and password."
+        );
       }
     } finally {
       setLoading(false);
@@ -66,92 +70,87 @@ function Login() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
+    <div className="login-page">
 
-        <div className="auth-left">
-          <div className="auth-brand">
-            🍽️ ZestHub
+      <div className="login-card">
+
+        <div className="login-header">
+
+          <div className="login-icon">
+            🍽️
           </div>
 
-          <h1>
-            Welcome <span>Back!</span>
-          </h1>
+          <h1>Welcome Back</h1>
 
           <p>
-            Discover amazing restaurants, explore delicious food,
-            and connect with the ZestHub community.
+            Login to continue exploring ZestHub
           </p>
 
-          <div className="auth-features">
-            <div>📍 Discover restaurants around you</div>
-            <div>⭐ Read ratings and reviews</div>
-            <div>❤️ Save your favorite restaurants</div>
-          </div>
         </div>
 
-        <div className="auth-card">
+        {message && (
+          <div className="login-success">
+            {message}
+          </div>
+        )}
 
-          <div className="auth-card-header">
-            <h2>Login</h2>
-            <p>Sign in to continue to ZestHub</p>
+        {error && (
+          <div className="login-error">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+
+          <div className="form-group">
+
+            <label htmlFor="email">
+              Email Address
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+
           </div>
 
-          {error && (
-            <div className="auth-message error">
-              {error}
-            </div>
-          )}
+          <div className="form-group">
 
-          {success && (
-            <div className="auth-message success">
-              {success}
-            </div>
-          )}
+            <label htmlFor="password">
+              Password
+            </label>
 
-          <form onSubmit={handleSubmit}>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
 
-            <div className="form-group">
-              <label>Email Address</label>
-
-              <input
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
-                autoComplete="email"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Password</label>
-
-              <input
-                type="password"
-                name="password"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={handleChange}
-                autoComplete="current-password"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="auth-button"
-              disabled={loading}
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
-
-          </form>
-
-          <div className="auth-divider">
-            <span>OR</span>
           </div>
 
-          <p className="auth-switch">
+          <button
+            type="submit"
+            className="login-button"
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+
+        </form>
+
+        <div className="login-footer">
+
+          <p>
             Don't have an account?{" "}
             <Link to="/register">
               Create Account
@@ -161,6 +160,7 @@ function Login() {
         </div>
 
       </div>
+
     </div>
   );
 }

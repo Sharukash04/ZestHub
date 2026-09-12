@@ -129,3 +129,20 @@
     gap: 18px;
   }
 }
+
+.logout-button {
+  border: 1px solid #ff5a2f;
+  background: transparent;
+  color: #e85d04;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.logout-button:hover {
+  background: #e85d04;
+  color: white;
+}
