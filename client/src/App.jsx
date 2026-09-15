@@ -1,40 +1,28 @@
 import { Routes, Route } from "react-router-dom";
 
 // Components
-import Navbar from "./components/Navbar/Navbar";
-import Hero from "./components/Hero/Hero";
-import FeaturedRestaurants from "./components/FeaturedRestaurants/FeaturedRestaurants";
-import TrendingRestaurants from "./components/TrendingRestaurants/TrendingRestaurants";
+import Navbar from "./components/Navbar";
+
+// Public Pages
+import Home from "./pages/Home";
+import RestaurantDetails from "./pages/RestaurantDetails";
 
 // Restaurant Pages
 import Restaurants from "./pages/Restaurants/Restaurants";
-import RestaurantDetails from "./pages/RestaurantDetails";
 
 // Authentication Pages
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import VerifyEmail from "./pages/Auth/VerifyEmail";
 
-// Dashboard
+// User Pages
 import Dashboard from "./pages/Dashboard/Dashboard";
+import Profile from "./pages/Profile/Profile";
 
 // Admin Pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AddRestaurant from "./pages/Admin/AddRestaurant";
 import EditRestaurant from "./pages/Admin/EditRestaurant";
-
-
-// Public Home Page
-function Home() {
-  return (
-    <>
-      <Hero />
-      <FeaturedRestaurants />
-      <TrendingRestaurants />
-    </>
-  );
-}
-
 
 function App() {
   return (
@@ -44,36 +32,14 @@ function App() {
       <Routes>
 
         {/* =========================
-            PUBLIC HOME
+            PUBLIC ROUTES
         ========================= */}
-        <Route path="/" element={<Home />} />
-
-
-        {/* =========================
-            AUTHENTICATION
-        ========================= */}
-        <Route path="/login" element={<Login />} />
-
-        <Route path="/register" element={<Register />} />
 
         <Route
-          path="/verify-email"
-          element={<VerifyEmail />}
+          path="/"
+          element={<Home />}
         />
 
-
-        {/* =========================
-            USER DASHBOARD
-        ========================= */}
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
-
-
-        {/* =========================
-            RESTAURANTS
-        ========================= */}
         <Route
           path="/restaurants"
           element={<Restaurants />}
@@ -86,20 +52,56 @@ function App() {
 
 
         {/* =========================
-            ADMIN
+            AUTHENTICATION ROUTES
         ========================= */}
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
+        <Route
+          path="/verify-email"
+          element={<VerifyEmail />}
+        />
+
+
+        {/* =========================
+            USER ROUTES
+        ========================= */}
+
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/profile"
+          element={<Profile />}
+        />
+
+
+        {/* =========================
+            ADMIN ROUTES
+        ========================= */}
+
         <Route
           path="/admin"
           element={<AdminDashboard />}
         />
 
         <Route
-          path="/admin/restaurants/add"
+          path="/admin/add-restaurant"
           element={<AddRestaurant />}
         />
 
         <Route
-          path="/admin/restaurants/edit/:id"
+          path="/admin/edit-restaurant/:id"
           element={<EditRestaurant />}
         />
 

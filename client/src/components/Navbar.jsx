@@ -1,16 +1,83 @@
 import "./Navbar.css";
+import {
+  Link,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 
 function Navbar() {
-  return (
-    <nav>
-      <h2 className="logo">ZestHub</h2>
+  const navigate = useNavigate();
+  const location = useLocation();
 
-      <div className="menu">
-        <a href="#">Home</a>
-        <a href="#">Restaurants</a>
-        <a href="#">About</a>
-        <a href="#">Login</a>
+  const token = localStorage.getItem("zesthub_token");
+
+  const isLoggedIn =
+    !!token ||
+    location.pathname === "/dashboard" ||
+    location.pathname === "/profile";
+
+  const handleLogout = () => {
+    localStorage.removeItem("zesthub_token");
+    localStorage.removeItem("zesthub_user");
+
+    navigate("/");
+  };
+
+  return (
+    <nav className="navbar">
+
+      {/* Logo */}
+      <div className="logo">
+        <Link to={isLoggedIn ? "/dashboard" : "/"}>
+          🍽️ ZestHub
+        </Link>
       </div>
+
+      {/* Navigation */}
+      <div className="menu">
+
+        {isLoggedIn ? (
+          <>
+            <Link to="/dashboard">
+              Dashboard
+            </Link>
+
+            <Link to="/restaurants">
+              Restaurants
+            </Link>
+
+            <Link to="/profile">
+              Profile
+            </Link>
+
+            <button
+              className="nav-button"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/">
+              Home
+            </Link>
+
+            <Link to="/restaurants">
+              Restaurants
+            </Link>
+
+            <Link
+              to="/login"
+              className="nav-button"
+            >
+              Login
+            </Link>
+          </>
+        )}
+
+      </div>
+
     </nav>
   );
 }
