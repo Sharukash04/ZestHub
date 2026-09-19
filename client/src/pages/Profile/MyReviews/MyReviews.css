@@ -1,0 +1,314 @@
+.my-reviews-page {
+  min-height: calc(100vh - 80px);
+  padding: 45px 7%;
+  background: #f8f9fb;
+}
+
+/* HEADER */
+
+.my-reviews-header {
+  max-width: 1100px;
+  margin: 0 auto 35px;
+}
+
+.back-button {
+  border: none;
+  background: transparent;
+  color: #ff5a1f;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 22px;
+}
+
+.back-button:hover {
+  color: #e64b12;
+}
+
+.my-reviews-header h1 {
+  margin: 0 0 8px;
+  font-size: 34px;
+  color: #222;
+}
+
+.my-reviews-header p {
+  margin: 0;
+  color: #777;
+  font-size: 16px;
+}
+
+/* LOADING */
+
+.my-reviews-loading {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 38px;
+  height: 38px;
+  border: 4px solid #eee;
+  border-top: 4px solid #ff5a1f;
+  border-radius: 50%;
+  animation: reviewSpin 0.8s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes reviewSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ERROR */
+
+.reviews-error {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 25px;
+  background: #fff;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+}
+
+.reviews-error p {
+  color: #d64545;
+  margin-bottom: 15px;
+}
+
+.reviews-error button {
+  border: none;
+  background: #ff5a1f;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* EMPTY */
+
+.empty-reviews {
+  max-width: 650px;
+  margin: 60px auto;
+  background: white;
+  border-radius: 18px;
+  padding: 55px 35px;
+  text-align: center;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.07);
+}
+
+.empty-reviews-icon {
+  font-size: 55px;
+  margin-bottom: 15px;
+}
+
+.empty-reviews h2 {
+  margin: 0 0 12px;
+  color: #222;
+}
+
+.empty-reviews p {
+  color: #777;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.empty-reviews button {
+  border: none;
+  background: #ff5a1f;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.empty-reviews button:hover {
+  background: #e64b12;
+}
+
+/* REVIEWS CONTAINER */
+
+.reviews-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.reviews-count {
+  color: #666;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+/* REVIEW CARD */
+
+.my-review-card {
+  background: white;
+  border-radius: 17px;
+  margin-bottom: 20px;
+  padding: 24px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.my-review-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.09);
+}
+
+/* RESTAURANT */
+
+.review-restaurant {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eee;
+}
+
+.review-restaurant-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 13px;
+  background: #fff1eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.review-restaurant-info {
+  flex: 1;
+}
+
+.review-restaurant-info h2 {
+  margin: 0 0 5px;
+  font-size: 20px;
+  color: #222;
+}
+
+.review-restaurant-info p {
+  margin: 0 0 8px;
+  color: #777;
+  font-size: 14px;
+}
+
+.review-cuisine {
+  display: inline-block;
+  padding: 4px 9px;
+  border-radius: 20px;
+  background: #f2f2f2;
+  color: #555;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.review-rating {
+  background: #f0fff4;
+  color: #17823b;
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* REVIEW CONTENT */
+
+.review-content {
+  padding: 20px 0 10px;
+}
+
+.review-date {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 10px;
+}
+
+.review-comment {
+  margin: 0;
+  color: #333;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ACTIONS */
+
+.review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.view-restaurant-button,
+.delete-review-button {
+  border: none;
+  padding: 9px 15px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.view-restaurant-button {
+  background: #fff1eb;
+  color: #ff5a1f;
+}
+
+.view-restaurant-button:hover {
+  background: #ffe2d6;
+}
+
+.delete-review-button {
+  background: #fff0f0;
+  color: #d64545;
+}
+
+.delete-review-button:hover {
+  background: #ffe0e0;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+  .my-reviews-page {
+    padding: 30px 18px;
+  }
+
+  .my-reviews-header h1 {
+    font-size: 28px;
+  }
+
+  .my-review-card {
+    padding: 18px;
+  }
+
+  .review-restaurant {
+    align-items: flex-start;
+  }
+
+  .review-rating {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  .review-actions {
+    justify-content: stretch;
+    flex-direction: column;
+  }
+
+  .view-restaurant-button,
+  .delete-review-button {
+    width: 100%;
+  }
+}

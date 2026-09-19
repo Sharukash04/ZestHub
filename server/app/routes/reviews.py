@@ -73,6 +73,55 @@ def get_restaurant_reviews(
 
 
 # ---------------------------------------------------------
+# GET MY REVIEWS
+# ---------------------------------------------------------
+
+@router.get("/my-reviews")
+def get_my_reviews(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+
+    reviews = (
+        db.query(Review)
+        .filter(
+            Review.user_id == current_user.id
+        )
+        .order_by(Review.created_at.desc())
+        .all()
+    )
+
+    result = []
+
+    for review in reviews:
+
+        restaurant = db.query(Restaurant).filter(
+            Restaurant.id == review.restaurant_id
+        ).first()
+
+        if not restaurant:
+            continue
+
+        result.append({
+            "id": review.id,
+            "comment": review.comment,
+            "created_at": review.created_at,
+
+            "user_id": review.user_id,
+            "user_name": current_user.name,
+
+            "restaurant_id": restaurant.id,
+            "restaurant_name": restaurant.name,
+            "restaurant_location": restaurant.location,
+            "restaurant_cuisine": restaurant.cuisine,
+            "restaurant_image": restaurant.image,
+            "restaurant_rating": restaurant.average_rating
+        })
+
+    return result
+
+
+# ---------------------------------------------------------
 # CREATE REVIEW
 # ---------------------------------------------------------
 

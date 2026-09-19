@@ -1,28 +1,25 @@
 import { Routes, Route } from "react-router-dom";
 
-// Components
 import Navbar from "./components/Navbar";
 
-// Public Pages
 import Home from "./pages/Home";
 import RestaurantDetails from "./pages/RestaurantDetails";
-
-// Restaurant Pages
 import Restaurants from "./pages/Restaurants/Restaurants";
 
-// Authentication Pages
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import VerifyEmail from "./pages/Auth/VerifyEmail";
 
-// User Pages
 import Dashboard from "./pages/Dashboard/Dashboard";
-import Profile from "./pages/Profile/Profile";
 
-// Admin Pages
+import Profile from "./pages/Profile/Profile";
+import MyReviews from "./pages/Profile/MyReviews/MyReviews";
+import Favorites from "./pages/Profile/Favorites/Favorites";
+
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AddRestaurant from "./pages/Admin/AddRestaurant";
 import EditRestaurant from "./pages/Admin/EditRestaurant";
+
 
 function App() {
   return (
@@ -31,14 +28,8 @@ function App() {
 
       <Routes>
 
-        {/* =========================
-            PUBLIC ROUTES
-        ========================= */}
-
-        <Route
-          path="/"
-          element={<Home />}
-        />
+        {/* Public Pages */}
+        <Route path="/" element={<Home />} />
 
         <Route
           path="/restaurants"
@@ -51,10 +42,7 @@ function App() {
         />
 
 
-        {/* =========================
-            AUTHENTICATION ROUTES
-        ========================= */}
-
+        {/* Authentication */}
         <Route
           path="/login"
           element={<Login />}
@@ -71,10 +59,7 @@ function App() {
         />
 
 
-        {/* =========================
-            USER ROUTES
-        ========================= */}
-
+        {/* User Pages */}
         <Route
           path="/dashboard"
           element={<Dashboard />}
@@ -85,11 +70,18 @@ function App() {
           element={<Profile />}
         />
 
+        <Route
+          path="/profile/reviews"
+          element={<MyReviews />}
+        />
+        
+        <Route
+          path="/profile/favorites"
+          element={<Favorites />}
+        />
 
-        {/* =========================
-            ADMIN ROUTES
-        ========================= */}
 
+        {/* Admin Pages */}
         <Route
           path="/admin"
           element={<AdminDashboard />}
