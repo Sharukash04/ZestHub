@@ -11,6 +11,7 @@ function Register() {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "user",
   });
 
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,8 @@ function Register() {
       !formData.name ||
       !formData.email ||
       !formData.password ||
-      !formData.confirmPassword
+      !formData.confirmPassword ||
+      !formData.role
     ) {
       setError("Please fill in all fields.");
       return;
@@ -55,6 +57,11 @@ function Register() {
       return;
     }
 
+    if (!["user", "owner"].includes(formData.role)) {
+      setError("Please select a valid account type.");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -64,18 +71,18 @@ function Register() {
           name: formData.name.trim(),
           email: formData.email.trim().toLowerCase(),
           password: formData.password,
+          role: formData.role,
         }
       );
 
       setSuccess(
         response.data.message ||
-        "Registration successful! Please check your email."
+          "Registration successful! Please check your email."
       );
 
       setTimeout(() => {
         navigate("/login");
       }, 1500);
-
     } catch (err) {
       if (err.response?.data?.detail) {
         setError(err.response.data.detail);
@@ -89,7 +96,6 @@ function Register() {
 
   return (
     <div className="auth-page">
-
       <div className="auth-container">
 
         {/* LEFT SIDE */}
@@ -111,7 +117,6 @@ function Register() {
 
           <div className="auth-features">
             <div>📍 Find restaurants around you</div>
-            <div>⭐ Rate and review your experiences</div>
             <div>❤️ Save your favorite restaurants</div>
             <div>✨ Get personalized recommendations</div>
           </div>
@@ -146,6 +151,8 @@ function Register() {
 
           <form onSubmit={handleSubmit}>
 
+            {/* NAME */}
+
             <div className="form-group">
 
               <label>Full Name</label>
@@ -160,6 +167,8 @@ function Register() {
               />
 
             </div>
+
+            {/* EMAIL */}
 
             <div className="form-group">
 
@@ -176,6 +185,30 @@ function Register() {
 
             </div>
 
+            {/* ACCOUNT TYPE */}
+
+            <div className="form-group">
+
+              <label>Account Type</label>
+
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+              >
+                <option value="user">
+                  Customer
+                </option>
+
+                <option value="owner">
+                  Restaurant Owner
+                </option>
+              </select>
+
+            </div>
+
+            {/* PASSWORD */}
+
             <div className="form-group">
 
               <label>Password</label>
@@ -190,6 +223,8 @@ function Register() {
               />
 
             </div>
+
+            {/* CONFIRM PASSWORD */}
 
             <div className="form-group">
 
@@ -206,12 +241,16 @@ function Register() {
 
             </div>
 
+            {/* SUBMIT */}
+
             <button
               type="submit"
               className="auth-button"
               disabled={loading}
             >
-              {loading ? "Creating Account..." : "Create Account"}
+              {loading
+                ? "Creating Account..."
+                : "Create Account"}
             </button>
 
           </form>
@@ -233,7 +272,6 @@ function Register() {
         </div>
 
       </div>
-
     </div>
   );
 }

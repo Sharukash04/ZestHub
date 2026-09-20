@@ -11,11 +11,8 @@ from app.routes.auth import router as auth_router
 from app.routes.reviews import router as review_router
 from app.routes.ratings import router as rating_router
 from app.routes.favorites import router as favorite_router
+from app.routes.menu_items import router as menu_item_router
 
-
-# ==================================================
-# ZestHub FastAPI Application
-# ==================================================
 
 app = FastAPI(
     title="ZestHub API",
@@ -24,9 +21,9 @@ app = FastAPI(
 )
 
 
-# ==================================================
-# CORS
-# ==================================================
+# ---------------------------------------------------------
+# CORS CONFIGURATION
+# ---------------------------------------------------------
 
 app.add_middleware(
     CORSMiddleware,
@@ -40,16 +37,16 @@ app.add_middleware(
 )
 
 
-# ==================================================
-# Database
-# ==================================================
+# ---------------------------------------------------------
+# DATABASE
+# ---------------------------------------------------------
 
 Base.metadata.create_all(bind=engine)
 
 
-# ==================================================
-# Static Files - Restaurant Images
-# ==================================================
+# ---------------------------------------------------------
+# STATIC FILES
+# ---------------------------------------------------------
 
 app.mount(
     "/uploads",
@@ -58,9 +55,9 @@ app.mount(
 )
 
 
-# ==================================================
-# API Routers
-# ==================================================
+# ---------------------------------------------------------
+# API ROUTES
+# ---------------------------------------------------------
 
 app.include_router(restaurant_router)
 app.include_router(category_router)
@@ -68,11 +65,12 @@ app.include_router(auth_router)
 app.include_router(review_router)
 app.include_router(rating_router)
 app.include_router(favorite_router)
+app.include_router(menu_item_router)
 
 
-# ==================================================
-# Home
-# ==================================================
+# ---------------------------------------------------------
+# ROOT ENDPOINT
+# ---------------------------------------------------------
 
 @app.get("/")
 def home():
@@ -81,9 +79,9 @@ def home():
     }
 
 
-# ==================================================
-# Health Check
-# ==================================================
+# ---------------------------------------------------------
+# HEALTH CHECK
+# ---------------------------------------------------------
 
 @app.get("/api/health")
 def health_check():

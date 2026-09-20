@@ -45,6 +45,15 @@ class RegisterRequest(BaseModel):
         max_length=72
     )
 
+    # Public registration supports only:
+    # user   = Customer
+    # owner  = Restaurant Owner
+    #
+    # admin is intentionally NOT allowed here.
+    role: str = Field(
+        default="user"
+    )
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -71,6 +80,11 @@ async def register(
 
     name = data.name.strip()
     email = data.email.lower().strip()
+    requested_role = data.role.strip().lower()
+
+    # -----------------------------------------------------
+    # Validate name
+    # -----------------------------------------------------
 
     if not name:
         raise HTTPException(
@@ -78,7 +92,25 @@ async def register(
             detail="Name cannot be empty."
         )
 
+    # -----------------------------------------------------
+    # Validate public registration role
+    # -----------------------------------------------------
+
+    allowed_roles = {
+        "user",
+        "owner",
+    }
+
+    if requested_role not in allowed_roles:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid account type. Please choose Customer or Restaurant Owner."
+        )
+
+    # -----------------------------------------------------
     # Check existing user
+    # -----------------------------------------------------
+
     existing_user = (
         db.query(User)
         .filter(User.email == email)
@@ -91,7 +123,10 @@ async def register(
             detail="Email already registered."
         )
 
+    # -----------------------------------------------------
     # Generate email verification token
+    # -----------------------------------------------------
+
     verification_token = secrets.token_urlsafe(32)
 
     verification_expiry = (
@@ -99,12 +134,19 @@ async def register(
         + timedelta(hours=24)
     )
 
+    # -----------------------------------------------------
     # Create user
+    # -----------------------------------------------------
+
     user = User(
         name=name,
         email=email,
         password=hash_password(data.password),
-        role="user",
+
+        # Only user or owner can reach this point.
+        # Admin cannot be created through registration.
+        role=requested_role,
+
         is_verified=False,
         verification_token=verification_token,
         verification_token_expires=verification_expiry,
@@ -132,6 +174,10 @@ async def register(
         email=user.email,
         verification_token=user.verification_token
     )
+
+    # -----------------------------------------------------
+    # Return registration result
+    # -----------------------------------------------------
 
     return {
         "message": "User registered successfully",
@@ -185,7 +231,10 @@ async def login(
             detail="Invalid email or password."
         )
 
+    # -----------------------------------------------------
     # Create JWT
+    # -----------------------------------------------------
+
     access_token = create_access_token(
         data={
             "sub": str(user.id),
@@ -289,7 +338,10 @@ def verify_email(
             detail="Verification token has expired."
         )
 
+    # -----------------------------------------------------
     # Verify account
+    # -----------------------------------------------------
+
     user.is_verified = True
 
     # Remove token after successful verification
@@ -301,6 +353,7 @@ def verify_email(
 
     return {
         "message": "Email verified successfully.",
+
         "user": {
             "id": user.id,
             "name": user.name,

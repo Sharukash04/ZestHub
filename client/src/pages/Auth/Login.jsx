@@ -38,20 +38,31 @@ function Login() {
         }
       );
 
+      // Save authentication token
       localStorage.setItem(
         "zesthub_token",
         response.data.access_token
       );
 
+      // Save logged-in user
       localStorage.setItem(
         "zesthub_user",
         JSON.stringify(response.data.user)
       );
 
+      const user = response.data.user;
+
       setMessage("Login successful! Welcome to ZestHub 🍽️");
 
+      // Role-based navigation
       setTimeout(() => {
-        navigate("/dashboard");
+        if (user.role === "admin") {
+          navigate("/admin");
+        } else if (user.role === "owner") {
+          navigate("/owner");
+        } else {
+          navigate("/dashboard");
+        }
       }, 500);
 
     } catch (error) {

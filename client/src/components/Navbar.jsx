@@ -11,10 +11,37 @@ function Navbar() {
 
   const token = localStorage.getItem("zesthub_token");
 
+  const storedUser = localStorage.getItem("zesthub_user");
+
+  let currentUser = null;
+
+  try {
+    currentUser = storedUser ? JSON.parse(storedUser) : null;
+  } catch (error) {
+    console.error("Unable to read logged-in user:", error);
+  }
+
   const isLoggedIn =
     !!token ||
     location.pathname === "/dashboard" ||
+    location.pathname === "/owner" ||
+    location.pathname === "/admin" ||
     location.pathname === "/profile";
+
+  // Decide which dashboard to open based on role
+  const getDashboardPath = () => {
+    if (currentUser?.role === "admin") {
+      return "/admin";
+    }
+
+    if (currentUser?.role === "owner") {
+      return "/owner";
+    }
+
+    return "/dashboard";
+  };
+
+  const dashboardPath = getDashboardPath();
 
   const handleLogout = () => {
     localStorage.removeItem("zesthub_token");
@@ -28,7 +55,7 @@ function Navbar() {
 
       {/* Logo */}
       <div className="logo">
-        <Link to={isLoggedIn ? "/dashboard" : "/"}>
+        <Link to={isLoggedIn ? dashboardPath : "/"}>
           🍽️ ZestHub
         </Link>
       </div>
@@ -38,7 +65,8 @@ function Navbar() {
 
         {isLoggedIn ? (
           <>
-            <Link to="/dashboard">
+            {/* Role-based Dashboard */}
+            <Link to={dashboardPath}>
               Dashboard
             </Link>
 
@@ -46,9 +74,12 @@ function Navbar() {
               Restaurants
             </Link>
 
-            <Link to="/profile">
-              Profile
-            </Link>
+            {/* Profile is mainly for customers */}
+            {currentUser?.role !== "admin" && (
+              <Link to="/profile">
+                Profile
+              </Link>
+            )}
 
             <button
               className="nav-button"

@@ -7,6 +7,7 @@ from sqlalchemy import (
     ForeignKey,
     DateTime,
     Boolean,
+    Numeric,
 )
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -32,6 +33,9 @@ class User(Base):
 
     # --------------------------------
     # USER ROLE
+    # user   = Customer
+    # owner  = Restaurant Owner
+    # admin  = Administrator
     # --------------------------------
     role = Column(
         String(20),
@@ -60,6 +64,9 @@ class User(Base):
         nullable=True
     )
 
+    # --------------------------------
+    # USER RELATIONSHIPS
+    # --------------------------------
     reviews = relationship(
         "Review",
         back_populates="user"
@@ -73,6 +80,11 @@ class User(Base):
     favorites = relationship(
         "Favorite",
         back_populates="user"
+    )
+
+    owned_restaurants = relationship(
+        "Restaurant",
+        back_populates="owner"
     )
 
 
@@ -137,9 +149,23 @@ class Restaurant(Base):
         ForeignKey("categories.id")
     )
 
+    # --------------------------------
+    # RESTAURANT OWNER
+    # --------------------------------
+    owner_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
     category = relationship(
         "Category",
         back_populates="restaurants"
+    )
+
+    owner = relationship(
+        "User",
+        back_populates="owned_restaurants"
     )
 
     reviews = relationship(
@@ -155,6 +181,60 @@ class Restaurant(Base):
     favorites = relationship(
         "Favorite",
         back_populates="restaurant"
+    )
+
+    menu_items = relationship(
+        "MenuItem",
+        back_populates="restaurant",
+        cascade="all, delete-orphan"
+    )
+
+
+class MenuItem(Base):
+    __tablename__ = "menu_items"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    restaurant_id = Column(
+        Integer,
+        ForeignKey("restaurants.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+
+    name = Column(
+        String(150),
+        nullable=False
+    )
+
+    description = Column(
+        Text,
+        nullable=True
+    )
+
+    price = Column(
+        Numeric(10, 2),
+        nullable=False
+    )
+
+    image = Column(
+        String(255),
+        nullable=True
+    )
+
+    is_available = Column(
+        Boolean,
+        nullable=False,
+        default=True
+    )
+
+    restaurant = relationship(
+        "Restaurant",
+        back_populates="menu_items"
     )
 
 

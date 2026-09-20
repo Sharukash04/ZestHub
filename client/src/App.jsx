@@ -20,6 +20,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AddRestaurant from "./pages/Admin/AddRestaurant";
 import EditRestaurant from "./pages/Admin/EditRestaurant";
 
+import OwnerDashboard from "./pages/Owner/OwnerDashboard";
 
 function App() {
   return (
@@ -28,8 +29,14 @@ function App() {
 
       <Routes>
 
-        {/* Public Pages */}
-        <Route path="/" element={<Home />} />
+        {/* ================================
+            PUBLIC PAGES
+        ================================= */}
+
+        <Route
+          path="/"
+          element={<Home />}
+        />
 
         <Route
           path="/restaurants"
@@ -42,7 +49,10 @@ function App() {
         />
 
 
-        {/* Authentication */}
+        {/* ================================
+            AUTHENTICATION
+        ================================= */}
+
         <Route
           path="/login"
           element={<Login />}
@@ -59,7 +69,10 @@ function App() {
         />
 
 
-        {/* User Pages */}
+        {/* ================================
+            CUSTOMER
+        ================================= */}
+
         <Route
           path="/dashboard"
           element={<Dashboard />}
@@ -74,14 +87,37 @@ function App() {
           path="/profile/reviews"
           element={<MyReviews />}
         />
-        
+
         <Route
           path="/profile/favorites"
           element={<Favorites />}
         />
 
 
-        {/* Admin Pages */}
+        {/* ================================
+            RESTAURANT OWNER
+        ================================= */}
+
+        <Route
+          path="/owner"
+          element={<OwnerDashboard />}
+        />
+
+        <Route
+          path="/owner/add-restaurant"
+          element={<AddRestaurant />}
+        />
+
+        <Route
+          path="/owner/edit-restaurant/:id"
+          element={<EditRestaurant />}
+        />
+
+
+        {/* ================================
+            ADMIN
+        ================================= */}
+
         <Route
           path="/admin"
           element={<AdminDashboard />}
