@@ -109,6 +109,11 @@ function OwnerDashboard() {
     try {
       const token = localStorage.getItem("zesthub_token");
 
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
       const response = await fetch(
         `${API_URL}/api/restaurants/${restaurantId}`,
         {
@@ -139,6 +144,12 @@ function OwnerDashboard() {
       console.error("Delete restaurant error:", err);
       alert(err.message);
     }
+  };
+
+  const handleManageMenu = (restaurantId) => {
+    navigate(
+      `/owner/restaurant/${restaurantId}/menu`
+    );
   };
 
   if (loading) {
@@ -208,6 +219,7 @@ function OwnerDashboard() {
       <div className="owner-summary-grid">
 
         <div className="owner-summary-card">
+
           <div className="owner-summary-icon">
             🏪
           </div>
@@ -221,9 +233,11 @@ function OwnerDashboard() {
               {restaurants.length}
             </strong>
           </div>
+
         </div>
 
         <div className="owner-summary-card">
+
           <div className="owner-summary-icon">
             🍽️
           </div>
@@ -237,6 +251,7 @@ function OwnerDashboard() {
               Active
             </strong>
           </div>
+
         </div>
 
       </div>
@@ -318,6 +333,8 @@ function OwnerDashboard() {
                 key={restaurant.id}
               >
 
+                {/* CARD TOP */}
+
                 <div className="owner-card-top">
 
                   <div className="owner-card-icon">
@@ -334,6 +351,8 @@ function OwnerDashboard() {
                   </div>
 
                 </div>
+
+                {/* CARD CONTENT */}
 
                 <div className="owner-card-content">
 
@@ -356,6 +375,8 @@ function OwnerDashboard() {
                   )}
 
                 </div>
+
+                {/* RESTAURANT ACTIONS */}
 
                 <div className="owner-card-actions">
 
@@ -392,12 +413,12 @@ function OwnerDashboard() {
 
                 </div>
 
+                {/* MENU MANAGEMENT */}
+
                 <button
                   className="owner-menu-button"
                   onClick={() =>
-                    alert(
-                      "Menu management will be connected here next."
-                    )
+                    handleManageMenu(restaurant.id)
                   }
                 >
                   🍽️ Manage Menu
