@@ -1,45 +1,54 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./OwnerDashboard.css";
 
 const API_URL = "http://127.0.0.1:8000";
 
+function getStoredUser() {
+  const storedUser = localStorage.getItem("zesthub_user");
+
+  if (!storedUser) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(storedUser);
+  } catch {
+    localStorage.removeItem("zesthub_user");
+    return null;
+  }
+}
+
 function OwnerDashboard() {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState(null);
+  const [user] = useState(getStoredUser);
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("zesthub_user");
-
-    if (!storedUser) {
+    if (!user) {
       navigate("/login");
       return;
     }
 
-    try {
-      const parsedUser = JSON.parse(storedUser);
-
-      if (parsedUser.role !== "owner") {
-        if (parsedUser.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
-        return;
+    if (user.role !== "owner") {
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
       }
-
-      setUser(parsedUser);
-    } catch {
-      localStorage.removeItem("zesthub_user");
-      navigate("/login");
     }
-  }, [navigate]);
+  }, [navigate, user]);
 
   useEffect(() => {
+    if (!user || user.role !== "owner") {
+      return;
+    }
+
+    let cancelled = false;
+
     const fetchRestaurants = async () => {
       try {
         const token = localStorage.getItem("zesthub_token");
@@ -68,34 +77,33 @@ function OwnerDashboard() {
           ? data
           : [];
 
-        const storedUser =
-          localStorage.getItem("zesthub_user");
-
-        if (!storedUser) {
-          navigate("/login");
-          return;
-        }
-
-        const currentUser = JSON.parse(storedUser);
-
-        // Show ONLY this owner's restaurants
         const myRestaurants = allRestaurants.filter(
           (restaurant) =>
-            Number(restaurant.owner_id) ===
-            Number(currentUser.id)
+            Number(restaurant.owner_id) === Number(user.id)
         );
 
-        setRestaurants(myRestaurants);
+        if (!cancelled) {
+          setRestaurants(myRestaurants);
+        }
       } catch (err) {
         console.error("Owner restaurant error:", err);
-        setError("Unable to load your restaurants.");
+
+        if (!cancelled) {
+          setError("Unable to load your restaurants.");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchRestaurants();
-  }, [navigate]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate, user]);
 
   const handleDelete = async (restaurantId) => {
     const confirmed = window.confirm(
@@ -147,9 +155,7 @@ function OwnerDashboard() {
   };
 
   const handleManageMenu = (restaurantId) => {
-    navigate(
-      `/owner/restaurant/${restaurantId}/menu`
-    );
+    navigate(`/owner/restaurant/${restaurantId}/menu`);
   };
 
   if (loading) {
@@ -157,7 +163,7 @@ function OwnerDashboard() {
       <div className="owner-dashboard-page">
         <div className="owner-loading">
           <div className="owner-loading-icon">
-            🏪
+            🍽️
           </div>
 
           <h2>Loading Owner Dashboard...</h2>
@@ -333,32 +339,22 @@ function OwnerDashboard() {
                 key={restaurant.id}
               >
 
-                {/* CARD TOP */}
-
                 <div className="owner-card-top">
 
                   <div className="owner-card-icon">
                     🍴
                   </div>
 
-                  <div className="owner-rating">
-                    ⭐{" "}
-                    {Number(
-                      restaurant.average_rating ??
-                      restaurant.rating ??
-                      0
-                    ).toFixed(1)}
-                  </div>
-
-                </div>
-
-                {/* CARD CONTENT */}
-
-                <div className="owner-card-content">
-
                   <h3>
                     {restaurant.name}
                   </h3>
+
+                  <div className="owner-rating">
+                    ⭐{" "}
+                    {restaurant.average_rating ??
+                      restaurant.rating ??
+                      0}
+                  </div>
 
                   <p>
                     🍴 {restaurant.cuisine}
@@ -375,8 +371,6 @@ function OwnerDashboard() {
                   )}
 
                 </div>
-
-                {/* RESTAURANT ACTIONS */}
 
                 <div className="owner-card-actions">
 
@@ -412,8 +406,6 @@ function OwnerDashboard() {
                   </button>
 
                 </div>
-
-                {/* MENU MANAGEMENT */}
 
                 <button
                   className="owner-menu-button"

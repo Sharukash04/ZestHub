@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
-
-const API_URL = "http://127.0.0.1:8000";
 
 import biryaniImage from "../../assets/images/biryani.jpg";
 import burgerImage from "../../assets/images/burger.jpg";
@@ -15,13 +13,15 @@ import restaurant1Image from "../../assets/images/restaurant1.jpg";
 import restaurant2Image from "../../assets/images/restaurant2.jpg";
 import restaurant3Image from "../../assets/images/restaurant3.jpg";
 
+const API_URL = "http://127.0.0.1:8000";
+
 const imageMap = {
   "biryani.jpg": biryaniImage,
   "burger.jpg": burgerImage,
   "cafe.jpg": cafeImage,
   "desserts.jpg": dessertsImage,
   "hero-food.jpg": heroFoodImage,
-  "Kerala Food Court.jpg": keralaFoodImage,
+  "kerala food court.jpg": keralaFoodImage,
   "pizza.jpg": pizzaImage,
   "restaurant1.jpg": restaurant1Image,
   "restaurant2.jpg": restaurant2Image,
@@ -43,7 +43,6 @@ const imageMap = {
   "hotel aruvi.jpg": restaurant3Image,
 
   "kerala-food-court.jpg": keralaFoodImage,
-  "kerala food court.jpg": keralaFoodImage,
 
   "pizza-hut.jpg": pizzaImage,
   "pizza hut.jpg": pizzaImage,
@@ -52,7 +51,9 @@ const imageMap = {
 };
 
 const normalizeImageName = (value) => {
-  if (!value) return "";
+  if (!value) {
+    return "";
+  }
 
   return value
     .split("/")
@@ -61,10 +62,25 @@ const normalizeImageName = (value) => {
     .toLowerCase();
 };
 
+function getStoredUser() {
+  const storedUser = localStorage.getItem("zesthub_user");
+
+  if (!storedUser) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(storedUser);
+  } catch {
+    localStorage.removeItem("zesthub_user");
+    return null;
+  }
+}
+
 function Dashboard() {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState(null);
+  const [user] = useState(getStoredUser);
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -74,26 +90,12 @@ function Dashboard() {
   const [minimumRating, setMinimumRating] = useState(0);
 
   // ==========================================
-  // LOAD USER
-  // ==========================================
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("zesthub_user");
-
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        setUser(null);
-      }
-    }
-  }, []);
-
-  // ==========================================
   // FETCH RESTAURANTS
   // ==========================================
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchRestaurants = async () => {
       try {
         setLoading(true);
@@ -117,7 +119,10 @@ function Dashboard() {
 
         const data = await response.json();
 
-        // Backend returns { value: [...], Count: ... }
+        if (cancelled) {
+          return;
+        }
+
         if (Array.isArray(data)) {
           setRestaurants(data);
         } else if (Array.isArray(data.value)) {
@@ -127,13 +132,22 @@ function Dashboard() {
         }
       } catch (error) {
         console.error("Restaurant fetch error:", error);
-        setRestaurants([]);
+
+        if (!cancelled) {
+          setRestaurants([]);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchRestaurants();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // ==========================================
@@ -290,7 +304,9 @@ function Dashboard() {
   // ==========================================
 
   const handleImageError = (event) => {
-    if (event.currentTarget.dataset.fallback === "true") {
+    if (
+      event.currentTarget.dataset.fallback === "true"
+    ) {
       return;
     }
 
@@ -310,7 +326,7 @@ function Dashboard() {
   };
 
   const hasFilters =
-    search ||
+    Boolean(search) ||
     selectedCuisine !== "All" ||
     selectedLocation !== "All" ||
     minimumRating > 0;
@@ -334,7 +350,6 @@ function Dashboard() {
         }
       >
         <div className="dashboard-restaurant-image-wrapper">
-
           <img
             src={getRestaurantImage(restaurant)}
             alt={restaurant.name}
@@ -345,11 +360,9 @@ function Dashboard() {
           <span className="dashboard-rating">
             ⭐ {restaurantRating.toFixed(1)}
           </span>
-
         </div>
 
         <div className="dashboard-restaurant-content">
-
           <h3>{restaurant.name}</h3>
 
           <p className="dashboard-cuisine">
@@ -357,7 +370,7 @@ function Dashboard() {
           </p>
 
           <p className="dashboard-location">
-            📍 {restaurant.location}
+            📍 {restaurant.location || "Location unavailable"}
           </p>
 
           <button
@@ -372,7 +385,6 @@ function Dashboard() {
           >
             View Restaurant →
           </button>
-
         </div>
       </div>
     );
@@ -385,7 +397,6 @@ function Dashboard() {
   if (loading) {
     return (
       <div className="dashboard-page">
-
         <div className="dashboard-loading">
           <div className="dashboard-loading-icon">
             🍽️
@@ -397,7 +408,6 @@ function Dashboard() {
             Finding delicious restaurants for you.
           </p>
         </div>
-
       </div>
     );
   }
@@ -408,15 +418,12 @@ function Dashboard() {
 
   return (
     <div className="dashboard-page">
-
       {/* ======================================
           HEADER
       ====================================== */}
 
       <div className="dashboard-header">
-
         <div>
-
           <span className="dashboard-welcome-label">
             Welcome back 👋
           </span>
@@ -431,7 +438,6 @@ function Dashboard() {
             Discover amazing food and restaurants
             around you.
           </p>
-
         </div>
 
         <button
@@ -440,7 +446,6 @@ function Dashboard() {
         >
           👤 Profile
         </button>
-
       </div>
 
       {/* ======================================
@@ -448,9 +453,6 @@ function Dashboard() {
       ====================================== */}
 
       <div className="dashboard-feature-grid">
-
-        {/* FAVORITES - CLICKABLE */}
-
         <div
           className="dashboard-feature-card clickable"
           onClick={() => navigate("/profile")}
@@ -465,26 +467,16 @@ function Dashboard() {
             }
           }}
         >
+          <div className="feature-icon">❤️</div>
 
-          <div className="feature-icon">
-            ❤️
-          </div>
+          <h3>Favorites</h3>
 
-          <h3>
-            Favorites
-          </h3>
-
-          <p>
-            Your saved restaurants
-          </p>
+          <p>Your saved restaurants</p>
 
           <span className="feature-arrow">
             View Favorites →
           </span>
-
         </div>
-
-        {/* COMMUNITY */}
 
         <div
           className="dashboard-feature-card clickable"
@@ -496,26 +488,16 @@ function Dashboard() {
               })
           }
         >
+          <div className="feature-icon">👥</div>
 
-          <div className="feature-icon">
-            👥
-          </div>
+          <h3>Community</h3>
 
-          <h3>
-            Community
-          </h3>
-
-          <p>
-            See what food lovers are saying
-          </p>
+          <p>See what food lovers are saying</p>
 
           <span className="feature-arrow">
             Explore Community →
           </span>
-
         </div>
-
-        {/* POPULAR */}
 
         <div
           className="dashboard-feature-card clickable"
@@ -527,25 +509,16 @@ function Dashboard() {
               })
           }
         >
+          <div className="feature-icon">🔥</div>
 
-          <div className="feature-icon">
-            🔥
-          </div>
+          <h3>Popular</h3>
 
-          <h3>
-            Popular
-          </h3>
-
-          <p>
-            Most famous restaurants
-          </p>
+          <p>Most famous restaurants</p>
 
           <span className="feature-arrow">
             Explore Popular →
           </span>
-
         </div>
-
       </div>
 
       {/* ======================================
@@ -553,9 +526,7 @@ function Dashboard() {
       ====================================== */}
 
       <section className="dashboard-search-section">
-
         <div className="dashboard-section-title">
-
           <div>
             <span className="section-label">
               🔎 Discover
@@ -569,14 +540,10 @@ function Dashboard() {
               Search by restaurant, cuisine or location.
             </p>
           </div>
-
         </div>
 
         <div className="dashboard-search-box">
-
-          <span>
-            🔍
-          </span>
+          <span>🔍</span>
 
           <input
             type="text"
@@ -591,13 +558,12 @@ function Dashboard() {
             <button
               onClick={() => setSearch("")}
               className="clear-search"
+              type="button"
             >
               ✕
             </button>
           )}
-
         </div>
-
       </section>
 
       {/* ======================================
@@ -605,14 +571,13 @@ function Dashboard() {
       ====================================== */}
 
       <section className="dashboard-filter-section">
-
         <div className="filter-group">
-
-          <label>
+          <label htmlFor="cuisine-filter">
             Cuisine
           </label>
 
           <select
+            id="cuisine-filter"
             value={selectedCuisine}
             onChange={(event) =>
               setSelectedCuisine(event.target.value)
@@ -627,16 +592,15 @@ function Dashboard() {
               </option>
             ))}
           </select>
-
         </div>
 
         <div className="filter-group">
-
-          <label>
+          <label htmlFor="location-filter">
             Location
           </label>
 
           <select
+            id="location-filter"
             value={selectedLocation}
             onChange={(event) =>
               setSelectedLocation(event.target.value)
@@ -651,16 +615,15 @@ function Dashboard() {
               </option>
             ))}
           </select>
-
         </div>
 
         <div className="filter-group">
-
-          <label>
+          <label htmlFor="rating-filter">
             Minimum Rating
           </label>
 
           <select
+            id="rating-filter"
             value={minimumRating}
             onChange={(event) =>
               setMinimumRating(
@@ -668,62 +631,31 @@ function Dashboard() {
               )
             }
           >
-            <option value="0">
-              All Ratings
-            </option>
-
-            <option value="3">
-              ⭐ 3+
-            </option>
-
-            <option value="4">
-              ⭐ 4+
-            </option>
-
-            <option value="4.5">
-              ⭐ 4.5+
-            </option>
+            <option value="0">All Ratings</option>
+            <option value="3">⭐ 3+</option>
+            <option value="4">⭐ 4+</option>
+            <option value="4.5">⭐ 4.5+</option>
           </select>
-
         </div>
 
         {hasFilters && (
           <button
             className="clear-filters-button"
             onClick={clearFilters}
+            type="button"
           >
             Clear Filters
           </button>
         )}
-
       </section>
 
       {/* ======================================
-          FILTER RESULT
-      ====================================== */}
-
-      <div className="filter-result-info">
-
-        <strong>
-          {filteredRestaurants.length}
-        </strong>
-
-        <span>
-          restaurants found
-        </span>
-
-      </div>
-
-      {/* ======================================
-          NEARBY
+          NEARBY RESTAURANTS
       ====================================== */}
 
       <section className="dashboard-restaurant-section">
-
         <div className="dashboard-section-heading">
-
           <div>
-
             <span className="section-label">
               📍 Nearby
             </span>
@@ -735,7 +667,6 @@ function Dashboard() {
             <p>
               Discover restaurants available in your area.
             </p>
-
           </div>
 
           <button
@@ -746,31 +677,29 @@ function Dashboard() {
           >
             See All →
           </button>
-
         </div>
 
         {nearbyRestaurants.length === 0 ? (
-
           <div className="empty-dashboard-state">
+            <div>🔍</div>
 
-            <div>
-              🔍
-            </div>
-
-            <h3>
-              No restaurants found
-            </h3>
+            <h3>No restaurants found</h3>
 
             <p>
               Try changing your search or filters.
             </p>
 
+            {hasFilters && (
+              <button
+                onClick={clearFilters}
+                type="button"
+              >
+                Clear Filters
+              </button>
+            )}
           </div>
-
         ) : (
-
           <div className="dashboard-restaurant-grid">
-
             {nearbyRestaurants.map(
               (restaurant) => (
                 <RestaurantCard
@@ -779,11 +708,8 @@ function Dashboard() {
                 />
               )
             )}
-
           </div>
-
         )}
-
       </section>
 
       {/* ======================================
@@ -794,11 +720,8 @@ function Dashboard() {
         className="dashboard-restaurant-section"
         id="popular-section"
       >
-
         <div className="dashboard-section-heading">
-
           <div>
-
             <span className="section-label">
               🔥 Trending
             </span>
@@ -810,29 +733,19 @@ function Dashboard() {
             <p>
               Restaurants with the highest ratings.
             </p>
-
           </div>
-
         </div>
 
         <div className="dashboard-restaurant-grid">
-
           {popularRestaurants.length === 0 ? (
-
             <div className="empty-dashboard-state">
-
-              <div>
-                🍽️
-              </div>
+              <div>🍽️</div>
 
               <h3>
                 No popular restaurants yet
               </h3>
-
             </div>
-
           ) : (
-
             popularRestaurants.map(
               (restaurant) => (
                 <RestaurantCard
@@ -841,11 +754,8 @@ function Dashboard() {
                 />
               )
             )
-
           )}
-
         </div>
-
       </section>
 
       {/* ======================================
@@ -853,15 +763,12 @@ function Dashboard() {
       ====================================== */}
 
       <section className="recommended-section">
-
         <div className="recommended-content">
-
           <div className="recommended-icon">
             ✨
           </div>
 
           <div>
-
             <span className="section-label">
               ✨ Smart ZestHub
             </span>
@@ -875,15 +782,12 @@ function Dashboard() {
               based on your preferences, ratings and activity
               will appear here.
             </p>
-
           </div>
-
         </div>
 
         <span className="coming-soon-badge">
           Coming Soon
         </span>
-
       </section>
 
       {/* ======================================
@@ -894,11 +798,8 @@ function Dashboard() {
         className="community-dashboard-section"
         id="community-section"
       >
-
         <div className="dashboard-section-heading">
-
           <div>
-
             <span className="section-label">
               👥 ZestHub Community
             </span>
@@ -910,19 +811,15 @@ function Dashboard() {
             <p>
               Share experiences, ratings and reviews.
             </p>
-
           </div>
-
         </div>
 
         <div className="community-dashboard-card">
-
           <div className="community-big-icon">
             💬
           </div>
 
           <div>
-
             <h3>
               Your voice matters!
             </h3>
@@ -931,7 +828,6 @@ function Dashboard() {
               Rate restaurants and write reviews to
               help other ZestHub users discover great food.
             </p>
-
           </div>
 
           <button
@@ -941,11 +837,8 @@ function Dashboard() {
           >
             Explore Restaurants
           </button>
-
         </div>
-
       </section>
-
     </div>
   );
 }

@@ -35,89 +35,71 @@ function ManageMenu() {
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("zesthub_user");
-    const token = localStorage.getItem("zesthub_token");
+    const loadRestaurantAndMenu = async () => {
+      try {
+            setLoading(true);
+            setError("");
 
-    if (!storedUser || !token) {
-      navigate("/login");
-      return;
-    }
+            const restaurantResponse = await fetch(
+              `${API_URL}/api/restaurants/${restaurantId}`
+            );
 
-    try {
-      const user = JSON.parse(storedUser);
+            if (!restaurantResponse.ok) {
+              throw new Error("Restaurant not found");
+            }
 
-      if (user.role !== "owner" && user.role !== "admin") {
-        navigate("/dashboard");
-        return;
-      }
+            const restaurantData = await restaurantResponse.json();
 
-      fetchRestaurantAndMenu();
-    } catch (err) {
-      console.error(err);
-      navigate("/login");
-    }
+            const menuResponse = await fetch(
+              `${API_URL}/api/menu-items/restaurant/${restaurantId}`
+            );
+
+            if (!menuResponse.ok) {
+              throw new Error("Unable to load menu items");
+            }
+
+            const menuData = await menuResponse.json();
+
+            const storedUser =
+              localStorage.getItem("zesthub_user");
+
+            const currentUser = JSON.parse(storedUser);
+
+            if (
+              currentUser.role === "owner" &&
+              Number(restaurantData.owner_id) !==
+                Number(currentUser.id)
+            ) {
+              setError(
+                "You are not allowed to manage this restaurant."
+              );
+              return;
+            }
+
+            setRestaurant(restaurantData);
+
+            setMenuItems(
+              Array.isArray(menuData) ? menuData : []
+            );
+          } catch (err) {
+            console.error("Menu loading error:", err);
+
+            setError(
+              err.message || "Unable to load menu."
+            );
+          } finally {
+            setLoading(false);
+          }
+    };
+
+    loadRestaurantAndMenu();
+
   }, [navigate, restaurantId]);
 
   // ============================================================
   // LOAD RESTAURANT + MENU
   // ============================================================
 
-  const fetchRestaurantAndMenu = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const restaurantResponse = await fetch(
-        `${API_URL}/api/restaurants/${restaurantId}`
-      );
-
-      if (!restaurantResponse.ok) {
-        throw new Error("Restaurant not found");
-      }
-
-      const restaurantData = await restaurantResponse.json();
-
-      const menuResponse = await fetch(
-        `${API_URL}/api/menu-items/restaurant/${restaurantId}`
-      );
-
-      if (!menuResponse.ok) {
-        throw new Error("Unable to load menu items");
-      }
-
-      const menuData = await menuResponse.json();
-
-      const storedUser =
-        localStorage.getItem("zesthub_user");
-
-      const currentUser = JSON.parse(storedUser);
-
-      if (
-        currentUser.role === "owner" &&
-        Number(restaurantData.owner_id) !==
-          Number(currentUser.id)
-      ) {
-        setError(
-          "You are not allowed to manage this restaurant."
-        );
-        return;
-      }
-
-      setRestaurant(restaurantData);
-
-      setMenuItems(
-        Array.isArray(menuData) ? menuData : []
-      );
-    } catch (err) {
-      console.error("Menu loading error:", err);
-
-      setError(
-        err.message || "Unable to load menu."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // ============================================================
   // FORM CHANGE

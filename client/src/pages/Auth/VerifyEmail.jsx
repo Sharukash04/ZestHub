@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import "./VerifyEmail.css";
@@ -6,29 +6,48 @@ import "./VerifyEmail.css";
 function VerifyEmail() {
   const [searchParams] = useSearchParams();
 
-  const [status, setStatus] = useState("loading");
-  const [message, setMessage] = useState("Verifying your email...");
+  const token = searchParams.get("token");
+
+  const [status, setStatus] = useState(
+    token ? "loading" : "error"
+  );
+
+  const [message, setMessage] = useState(
+    token
+      ? "Verifying your email..."
+      : "Verification token is missing."
+  );
 
   useEffect(() => {
-    const token = searchParams.get("token");
-
     if (!token) {
-      setStatus("error");
-      setMessage("Verification token is missing.");
       return;
     }
+
+    let cancelled = false;
 
     const verifyEmail = async () => {
       try {
         const response = await axios.get(
-          `http://127.0.0.1:8000/api/auth/verify-email?token=${encodeURIComponent(token)}`
+          `http://127.0.0.1:8000/api/auth/verify-email?token=${encodeURIComponent(
+            token
+          )}`
         );
 
+        if (cancelled) {
+          return;
+        }
+
         setStatus("success");
+
         setMessage(
-          response.data.message || "Your email has been verified successfully."
+          response.data.message ||
+            "Your email has been verified successfully."
         );
       } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
         setStatus("error");
 
         const errorMessage =
@@ -40,7 +59,11 @@ function VerifyEmail() {
     };
 
     verifyEmail();
-  }, [searchParams]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   return (
     <div className="verify-page">
@@ -48,36 +71,36 @@ function VerifyEmail() {
         <div className="verify-icon">
           {status === "loading" && "⏳"}
           {status === "success" && "✅"}
-          {status === "error" && "❌"}
+          {status === "error" && "⚠️"}
         </div>
 
-        <h1>
-          {status === "loading" && "Verifying Email"}
-          {status === "success" && "Email Verified!"}
-          {status === "error" && "Verification Failed"}
-        </h1>
+        <div className="verify-content">
+          <h1>
+            {status === "loading" && "Verifying Email"}
+            {status === "success" && "Email Verified!"}
+            {status === "error" && "Verification Failed"}
+          </h1>
 
-        <p>{message}</p>
+          <p>{message}</p>
 
-        {status === "loading" && (
-          <div className="verify-loader">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        )}
+          {status === "success" && (
+            <Link to="/login" className="verify-button">
+              Continue to Login
+            </Link>
+          )}
 
-        {status === "success" && (
-          <Link to="/login" className="verify-button">
-            Continue to Login
-          </Link>
-        )}
+          {status === "error" && (
+            <Link to="/login" className="verify-button">
+              Back to Login
+            </Link>
+          )}
 
-        {status === "error" && (
-          <Link to="/login" className="verify-button">
-            Back to Login
-          </Link>
-        )}
+          {status === "loading" && (
+            <div className="verify-loading">
+              Please wait...
+            </div>
+          )}
+        </div>
 
         <div className="verify-brand">
           <span>🍽️</span>

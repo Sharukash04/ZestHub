@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Profile.css";
@@ -71,7 +75,6 @@ const normalizeImageName = (value) => {
     .toLowerCase();
 };
 
-
 function Profile() {
   const navigate = useNavigate();
 
@@ -86,6 +89,105 @@ function Profile() {
   const [favoritesError, setFavoritesError] =
     useState("");
 
+  /* =========================================
+     FETCH USER PROFILE
+  ========================================== */
+
+  const fetchUserProfile = useCallback(
+    async (token) => {
+      try {
+        const response = await axios.get(
+          `${API_URL}/api/auth/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        setUser(response.data);
+
+        localStorage.setItem(
+          "zesthub_user",
+          JSON.stringify(response.data)
+        );
+      } catch (error) {
+        console.error(
+          "Failed to load profile:",
+          error
+        );
+
+        if (error.response?.status === 401) {
+          localStorage.removeItem(
+            "zesthub_token"
+          );
+
+          localStorage.removeItem(
+            "zesthub_user"
+          );
+
+          navigate("/login");
+          return;
+        }
+
+        setError(
+          "Unable to load your profile."
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate]
+  );
+
+  /* =========================================
+     FETCH FAVORITES
+  ========================================== */
+
+  const fetchFavorites = useCallback(
+    async (token) => {
+      try {
+        setFavoritesLoading(true);
+        setFavoritesError("");
+
+        const response = await axios.get(
+          `${API_URL}/api/favorites/my-favorites`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        setFavorites(response.data);
+      } catch (error) {
+        console.error(
+          "Failed to load favorites:",
+          error
+        );
+
+        if (error.response?.status === 401) {
+          localStorage.removeItem(
+            "zesthub_token"
+          );
+
+          localStorage.removeItem(
+            "zesthub_user"
+          );
+
+          navigate("/login");
+          return;
+        }
+
+        setFavoritesError(
+          "Unable to load your favorite restaurants."
+        );
+      } finally {
+        setFavoritesLoading(false);
+      }
+    },
+    [navigate]
+  );
 
   /* =========================================
      LOAD PROFILE + FAVORITES
@@ -100,119 +202,19 @@ function Profile() {
       return;
     }
 
-    fetchUserProfile(token);
-    fetchFavorites(token);
-  }, [navigate]);
+    const loadProfileData = async () => {
+      await Promise.all([
+        fetchUserProfile(token),
+        fetchFavorites(token),
+      ]);
+    };
 
-
-  /* =========================================
-     FETCH USER
-  ========================================== */
-
-  const fetchUserProfile = async (token) => {
-    try {
-      const response = await axios.get(
-        `${API_URL}/api/auth/me`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setUser(response.data);
-
-      localStorage.setItem(
-        "zesthub_user",
-        JSON.stringify(response.data)
-      );
-
-    } catch (error) {
-
-      console.error(
-        "Failed to load profile:",
-        error
-      );
-
-      if (error.response?.status === 401) {
-
-        localStorage.removeItem(
-          "zesthub_token"
-        );
-
-        localStorage.removeItem(
-          "zesthub_user"
-        );
-
-        navigate("/login");
-        return;
-      }
-
-      setError(
-        "Unable to load your profile."
-      );
-
-    } finally {
-
-      setLoading(false);
-
-    }
-  };
-
-
-  /* =========================================
-     FETCH FAVORITES
-  ========================================== */
-
-  const fetchFavorites = async (token) => {
-    try {
-
-      setFavoritesLoading(true);
-      setFavoritesError("");
-
-      const response = await axios.get(
-        `${API_URL}/api/favorites/my-favorites`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setFavorites(response.data);
-
-    } catch (error) {
-
-      console.error(
-        "Failed to load favorites:",
-        error
-      );
-
-      if (error.response?.status === 401) {
-
-        localStorage.removeItem(
-          "zesthub_token"
-        );
-
-        localStorage.removeItem(
-          "zesthub_user"
-        );
-
-        navigate("/login");
-        return;
-      }
-
-      setFavoritesError(
-        "Unable to load your favorite restaurants."
-      );
-
-    } finally {
-
-      setFavoritesLoading(false);
-
-    }
-  };
-
+    loadProfileData();
+  }, [
+    navigate,
+    fetchUserProfile,
+    fetchFavorites,
+  ]);
 
   /* =========================================
      REMOVE FAVORITE
@@ -221,7 +223,6 @@ function Profile() {
   const handleRemoveFavorite = async (
     restaurantId
   ) => {
-
     const token =
       localStorage.getItem("zesthub_token");
 
@@ -231,7 +232,6 @@ function Profile() {
     }
 
     try {
-
       await axios.delete(
         `${API_URL}/api/favorites/restaurant/${restaurantId}`,
         {
@@ -248,16 +248,13 @@ function Profile() {
               restaurant.id !== restaurantId
           )
       );
-
     } catch (error) {
-
       console.error(
         "Failed to remove favorite:",
         error
       );
 
       if (error.response?.status === 401) {
-
         localStorage.removeItem(
           "zesthub_token"
         );
@@ -276,13 +273,11 @@ function Profile() {
     }
   };
 
-
   /* =========================================
      GET RESTAURANT IMAGE
   ========================================== */
 
   const getRestaurantImage = (image) => {
-
     if (!image) {
       return restaurant1Image;
     }
@@ -327,13 +322,11 @@ function Profile() {
     return restaurant1Image;
   };
 
-
   /* =========================================
      IMAGE ERROR FALLBACK
   ========================================== */
 
   const handleImageError = (event) => {
-
     if (
       event.currentTarget.dataset.fallback ===
       "true"
@@ -348,13 +341,11 @@ function Profile() {
       restaurant1Image;
   };
 
-
   /* =========================================
      LOGOUT
   ========================================== */
 
   const handleLogout = () => {
-
     localStorage.removeItem(
       "zesthub_token"
     );
@@ -366,36 +357,28 @@ function Profile() {
     navigate("/login");
   };
 
-
   /* =========================================
      LOADING
   ========================================== */
 
   if (loading) {
-
     return (
       <div className="profile-page">
-
         <div className="profile-loading">
           Loading your profile...
         </div>
-
       </div>
     );
   }
-
 
   /* =========================================
      ERROR
   ========================================== */
 
   if (error) {
-
     return (
       <div className="profile-page">
-
         <div className="profile-error">
-
           {error}
 
           <button
@@ -405,13 +388,10 @@ function Profile() {
           >
             Back to Dashboard
           </button>
-
         </div>
-
       </div>
     );
   }
-
 
   /* =========================================
      MAIN
@@ -423,7 +403,6 @@ function Profile() {
       {/* HEADER */}
 
       <section className="profile-header">
-
         <div className="profile-header-content">
 
           <span className="profile-label">
@@ -440,9 +419,7 @@ function Profile() {
           </p>
 
         </div>
-
       </section>
-
 
       {/* CONTENT */}
 
@@ -453,15 +430,12 @@ function Profile() {
         <div className="profile-card">
 
           <div className="profile-avatar">
-
             {user?.name
               ? user.name
                   .charAt(0)
                   .toUpperCase()
               : "U"}
-
           </div>
-
 
           <div className="profile-main-info">
 
@@ -480,13 +454,11 @@ function Profile() {
 
           </div>
 
-
           <div className="profile-role">
             {user?.role || "user"}
           </div>
 
         </div>
-
 
         {/* PERSONAL INFORMATION */}
 
@@ -513,7 +485,6 @@ function Profile() {
 
           </div>
 
-
           <div className="profile-info-grid">
 
             <div className="profile-info-card">
@@ -537,7 +508,6 @@ function Profile() {
 
             </div>
 
-
             <div className="profile-info-card">
 
               <span className="info-icon">
@@ -559,7 +529,6 @@ function Profile() {
 
             </div>
 
-
             <div className="profile-info-card">
 
               <span className="info-icon">
@@ -579,7 +548,6 @@ function Profile() {
               </div>
 
             </div>
-
 
             <div className="profile-info-card">
 
@@ -604,7 +572,6 @@ function Profile() {
           </div>
 
         </section>
-
 
         {/* FOOD PREFERENCES */}
 
@@ -643,7 +610,6 @@ function Profile() {
 
         </section>
 
-
         {/* FAVORITES */}
 
         <section
@@ -668,20 +634,14 @@ function Profile() {
 
           </div>
 
-
           {/* FAVORITES LOADING */}
 
           {favoritesLoading && (
-
             <div className="favorites-state">
-
               Loading your favorite
               restaurants...
-
             </div>
-
           )}
-
 
           {/* FAVORITES ERROR */}
 
@@ -707,9 +667,7 @@ function Profile() {
                 </button>
 
               </div>
-
             )}
-
 
           {/* EMPTY */}
 
@@ -741,9 +699,7 @@ function Profile() {
                 </button>
 
               </div>
-
             )}
-
 
           {/* FAVORITES GRID */}
 
@@ -780,7 +736,6 @@ function Profile() {
 
                       </div>
 
-
                       <div className="favorite-card-content">
 
                         <h3>
@@ -798,21 +753,17 @@ function Profile() {
                         </p>
 
                         <div className="favorite-rating">
-
                           ⭐{" "}
-
                           {restaurant.rating
                             ? Number(
                                 restaurant.rating
                               ).toFixed(1)
                             : "New"}
-
                         </div>
 
                         <p className="favorite-description">
                           {restaurant.description}
                         </p>
-
 
                         <div className="favorite-card-actions">
 
@@ -826,7 +777,6 @@ function Profile() {
                           >
                             View Restaurant
                           </button>
-
 
                           <button
                             className="favorite-remove-button"
@@ -844,16 +794,13 @@ function Profile() {
                       </div>
 
                     </article>
-
                   )
                 )}
 
               </div>
-
             )}
 
         </section>
-
 
         {/* QUICK ACTIONS */}
 
@@ -884,7 +831,6 @@ function Profile() {
 
           </button>
 
-
           <button
             className="profile-action-card"
             onClick={() =>
@@ -912,7 +858,6 @@ function Profile() {
 
         </div>
 
-
         {/* BOTTOM ACTIONS */}
 
         <div className="profile-bottom-actions">
@@ -925,7 +870,6 @@ function Profile() {
           >
             ← Back to Dashboard
           </button>
-
 
           <button
             className="profile-logout-button"

@@ -1,26 +1,32 @@
 import { Routes, Route } from "react-router-dom";
 
-import Navbar from "./components/Navbar";
-
+// Main Pages
 import Home from "./pages/Home";
-import RestaurantDetails from "./pages/RestaurantDetails";
 import Restaurants from "./pages/Restaurants/Restaurants";
+import RestaurantDetails from "./pages/RestaurantDetails";
 
+// Authentication
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import VerifyEmail from "./pages/Auth/VerifyEmail";
 
+// Customer Pages
 import Dashboard from "./pages/Dashboard/Dashboard";
-
 import Profile from "./pages/Profile/Profile";
-import MyReviews from "./pages/Profile/MyReviews/MyReviews";
 import Favorites from "./pages/Profile/Favorites/Favorites";
+import MyReviews from "./pages/Profile/MyReviews/MyReviews";
 
+// Admin Pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AddRestaurant from "./pages/Admin/AddRestaurant";
 import EditRestaurant from "./pages/Admin/EditRestaurant";
 
+// Owner Pages
 import OwnerDashboard from "./pages/Owner/OwnerDashboard";
+import ManageMenu from "./pages/Owner/ManageMenu";
+
+// Common Components
+import Navbar from "./components/Navbar";
 
 function App() {
   return (
@@ -28,15 +34,11 @@ function App() {
       <Navbar />
 
       <Routes>
-
-        {/* ================================
+        {/* =========================
             PUBLIC PAGES
-        ================================= */}
+        ========================== */}
 
-        <Route
-          path="/"
-          element={<Home />}
-        />
+        <Route path="/" element={<Home />} />
 
         <Route
           path="/restaurants"
@@ -48,10 +50,9 @@ function App() {
           element={<RestaurantDetails />}
         />
 
-
-        {/* ================================
+        {/* =========================
             AUTHENTICATION
-        ================================= */}
+        ========================== */}
 
         <Route
           path="/login"
@@ -68,10 +69,9 @@ function App() {
           element={<VerifyEmail />}
         />
 
-
-        {/* ================================
+        {/* =========================
             CUSTOMER
-        ================================= */}
+        ========================== */}
 
         <Route
           path="/dashboard"
@@ -84,39 +84,18 @@ function App() {
         />
 
         <Route
-          path="/profile/reviews"
-          element={<MyReviews />}
-        />
-
-        <Route
-          path="/profile/favorites"
+          path="/favorites"
           element={<Favorites />}
         />
 
-
-        {/* ================================
-            RESTAURANT OWNER
-        ================================= */}
-
         <Route
-          path="/owner"
-          element={<OwnerDashboard />}
+          path="/reviews"
+          element={<MyReviews />}
         />
 
-        <Route
-          path="/owner/add-restaurant"
-          element={<AddRestaurant />}
-        />
-
-        <Route
-          path="/owner/edit-restaurant/:id"
-          element={<EditRestaurant />}
-        />
-
-
-        {/* ================================
+        {/* =========================
             ADMIN
-        ================================= */}
+        ========================== */}
 
         <Route
           path="/admin"
@@ -133,6 +112,29 @@ function App() {
           element={<EditRestaurant />}
         />
 
+        {/* =========================
+            RESTAURANT OWNER
+        ========================== */}
+
+        <Route
+          path="/owner"
+          element={<OwnerDashboard />}
+        />
+
+        <Route
+          path="/owner/add-restaurant"
+          element={<AddRestaurant />}
+        />
+
+        <Route
+          path="/owner/edit-restaurant/:id"
+          element={<EditRestaurant />}
+        />
+
+        <Route
+          path="/owner/restaurant/:restaurantId/menu"
+          element={<ManageMenu />}
+        />
       </Routes>
     </>
   );
