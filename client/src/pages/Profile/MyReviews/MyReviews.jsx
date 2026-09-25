@@ -1,8 +1,8 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MyReviews.css";
 
-const API_URL = "http://127.0.0.1:8000";
+import API_URL from "../../../config";
 
 function MyReviews() {
   const navigate = useNavigate();
@@ -130,7 +130,7 @@ function MyReviews() {
           className="back-button"
           onClick={() => navigate("/profile")}
         >
-          ← Back to Profile
+          ? Back to Profile
         </button>
 
         <div className="my-reviews-title">
@@ -162,7 +162,7 @@ function MyReviews() {
 
         {!error && reviews.length === 0 && (
           <div className="my-reviews-empty">
-            <div className="empty-icon">✍️</div>
+            <div className="empty-icon">??</div>
 
             <h2>No Reviews Yet</h2>
 
@@ -202,7 +202,7 @@ function MyReviews() {
 
                     {review.restaurant_location && (
                       <p>
-                        📍 {review.restaurant_location}
+                        ?? {review.restaurant_location}
                       </p>
                     )}
 

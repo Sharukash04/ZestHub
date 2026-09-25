@@ -18,7 +18,7 @@ import restaurant1Image from "../../assets/images/restaurant1.jpg";
 import restaurant2Image from "../../assets/images/restaurant2.jpg";
 import restaurant3Image from "../../assets/images/restaurant3.jpg";
 
-const API_URL = "http://127.0.0.1:8000";
+import API_URL from "../../config";
 
 /* =========================================
    RESTAURANT IMAGE MAP

@@ -1,8 +1,8 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./OwnerDashboard.css";
 
-const API_URL = "http://127.0.0.1:8000";
+import API_URL from "../../config";
 
 function getStoredUser() {
   const storedUser = localStorage.getItem("zesthub_user");
@@ -163,7 +163,7 @@ function OwnerDashboard() {
       <div className="owner-dashboard-page">
         <div className="owner-loading">
           <div className="owner-loading-icon">
-            🍽️
+            ???
           </div>
 
           <h2>Loading Owner Dashboard...</h2>
@@ -185,7 +185,7 @@ function OwnerDashboard() {
 
         <div>
           <span className="owner-label">
-            🏪 Restaurant Owner
+            ?? Restaurant Owner
           </span>
 
           <h1>
@@ -204,7 +204,7 @@ function OwnerDashboard() {
             className="owner-profile-button"
             onClick={() => navigate("/profile")}
           >
-            👤 Profile
+            ?? Profile
           </button>
 
           <button
@@ -227,7 +227,7 @@ function OwnerDashboard() {
         <div className="owner-summary-card">
 
           <div className="owner-summary-icon">
-            🏪
+            ??
           </div>
 
           <div>
@@ -245,7 +245,7 @@ function OwnerDashboard() {
         <div className="owner-summary-card">
 
           <div className="owner-summary-icon">
-            🍽️
+            ???
           </div>
 
           <div>
@@ -306,7 +306,7 @@ function OwnerDashboard() {
           <div className="owner-empty-state">
 
             <div className="owner-empty-icon">
-              🏪
+              ??
             </div>
 
             <h3>
@@ -342,7 +342,7 @@ function OwnerDashboard() {
                 <div className="owner-card-top">
 
                   <div className="owner-card-icon">
-                    🍴
+                    ??
                   </div>
 
                   <h3>
@@ -350,18 +350,18 @@ function OwnerDashboard() {
                   </h3>
 
                   <div className="owner-rating">
-                    ⭐{" "}
+                    ?{" "}
                     {restaurant.average_rating ??
                       restaurant.rating ??
                       0}
                   </div>
 
                   <p>
-                    🍴 {restaurant.cuisine}
+                    ?? {restaurant.cuisine}
                   </p>
 
                   <p>
-                    📍 {restaurant.location}
+                    ?? {restaurant.location}
                   </p>
 
                   {restaurant.description && (
@@ -393,7 +393,7 @@ function OwnerDashboard() {
                       )
                     }
                   >
-                    ✏️ Edit
+                    ?? Edit
                   </button>
 
                   <button
@@ -402,7 +402,7 @@ function OwnerDashboard() {
                       handleDelete(restaurant.id)
                     }
                   >
-                    🗑️ Delete
+                    ??? Delete
                   </button>
 
                 </div>
@@ -413,7 +413,7 @@ function OwnerDashboard() {
                     handleManageMenu(restaurant.id)
                   }
                 >
-                  🍽️ Manage Menu
+                  ??? Manage Menu
                 </button>
 
               </div>

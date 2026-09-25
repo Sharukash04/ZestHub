@@ -1,3 +1,4 @@
+import API_URL from "../../config";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./EditRestaurant.css";
@@ -36,10 +37,10 @@ function EditRestaurant() {
         const [restaurantResponse, categoriesResponse] =
           await Promise.all([
             fetch(
-              `http://127.0.0.1:8000/api/restaurants/${id}`
+              `${API_URL}/api/restaurants/${id}`
             ),
             fetch(
-              "http://127.0.0.1:8000/api/categories/"
+              "${API_URL}/api/categories/"
             ),
           ]);
 
@@ -75,7 +76,7 @@ function EditRestaurant() {
             restaurantData.image.startsWith("/uploads/")
           ) {
             setPreview(
-              `http://127.0.0.1:8000${restaurantData.image}`
+              `${API_URL}${restaurantData.image}`
             );
           } else {
             setPreview(restaurantData.image);
@@ -170,7 +171,7 @@ function EditRestaurant() {
     if (restaurant?.image) {
       if (restaurant.image.startsWith("/uploads/")) {
         setPreview(
-          `http://127.0.0.1:8000${restaurant.image}`
+          `${API_URL}${restaurant.image}`
         );
       } else {
         setPreview(restaurant.image);
@@ -203,7 +204,7 @@ function EditRestaurant() {
       }
 
       const response = await fetch(
-        `http://127.0.0.1:8000/api/restaurants/${id}`,
+        `${API_URL}/api/restaurants/${id}`,
         {
           method: "PUT",
           body: data,

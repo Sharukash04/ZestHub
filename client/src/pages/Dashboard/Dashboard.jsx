@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
@@ -13,7 +13,7 @@ import restaurant1Image from "../../assets/images/restaurant1.jpg";
 import restaurant2Image from "../../assets/images/restaurant2.jpg";
 import restaurant3Image from "../../assets/images/restaurant3.jpg";
 
-const API_URL = "http://127.0.0.1:8000";
+import API_URL from "../../config";
 
 const imageMap = {
   "biryani.jpg": biryaniImage,
@@ -358,7 +358,7 @@ function Dashboard() {
           />
 
           <span className="dashboard-rating">
-            ⭐ {restaurantRating.toFixed(1)}
+            ? {restaurantRating.toFixed(1)}
           </span>
         </div>
 
@@ -366,11 +366,11 @@ function Dashboard() {
           <h3>{restaurant.name}</h3>
 
           <p className="dashboard-cuisine">
-            🍴 {restaurant.cuisine || "Various"}
+            ?? {restaurant.cuisine || "Various"}
           </p>
 
           <p className="dashboard-location">
-            📍 {restaurant.location || "Location unavailable"}
+            ?? {restaurant.location || "Location unavailable"}
           </p>
 
           <button
@@ -383,7 +383,7 @@ function Dashboard() {
               );
             }}
           >
-            View Restaurant →
+            View Restaurant ?
           </button>
         </div>
       </div>
@@ -399,7 +399,7 @@ function Dashboard() {
       <div className="dashboard-page">
         <div className="dashboard-loading">
           <div className="dashboard-loading-icon">
-            🍽️
+            ???
           </div>
 
           <h2>Loading your ZestHub...</h2>
@@ -425,7 +425,7 @@ function Dashboard() {
       <div className="dashboard-header">
         <div>
           <span className="dashboard-welcome-label">
-            Welcome back 👋
+            Welcome back ??
           </span>
 
           <h1>
@@ -444,7 +444,7 @@ function Dashboard() {
           className="dashboard-profile-button"
           onClick={() => navigate("/profile")}
         >
-          👤 Profile
+          ?? Profile
         </button>
       </div>
 
@@ -467,14 +467,14 @@ function Dashboard() {
             }
           }}
         >
-          <div className="feature-icon">❤️</div>
+          <div className="feature-icon">??</div>
 
           <h3>Favorites</h3>
 
           <p>Your saved restaurants</p>
 
           <span className="feature-arrow">
-            View Favorites →
+            View Favorites ?
           </span>
         </div>
 
@@ -488,14 +488,14 @@ function Dashboard() {
               })
           }
         >
-          <div className="feature-icon">👥</div>
+          <div className="feature-icon">??</div>
 
           <h3>Community</h3>
 
           <p>See what food lovers are saying</p>
 
           <span className="feature-arrow">
-            Explore Community →
+            Explore Community ?
           </span>
         </div>
 
@@ -509,14 +509,14 @@ function Dashboard() {
               })
           }
         >
-          <div className="feature-icon">🔥</div>
+          <div className="feature-icon">??</div>
 
           <h3>Popular</h3>
 
           <p>Most famous restaurants</p>
 
           <span className="feature-arrow">
-            Explore Popular →
+            Explore Popular ?
           </span>
         </div>
       </div>
@@ -529,7 +529,7 @@ function Dashboard() {
         <div className="dashboard-section-title">
           <div>
             <span className="section-label">
-              🔎 Discover
+              ?? Discover
             </span>
 
             <h2>
@@ -543,7 +543,7 @@ function Dashboard() {
         </div>
 
         <div className="dashboard-search-box">
-          <span>🔍</span>
+          <span>??</span>
 
           <input
             type="text"
@@ -560,7 +560,7 @@ function Dashboard() {
               className="clear-search"
               type="button"
             >
-              ✕
+              ?
             </button>
           )}
         </div>
@@ -632,9 +632,9 @@ function Dashboard() {
             }
           >
             <option value="0">All Ratings</option>
-            <option value="3">⭐ 3+</option>
-            <option value="4">⭐ 4+</option>
-            <option value="4.5">⭐ 4.5+</option>
+            <option value="3">? 3+</option>
+            <option value="4">? 4+</option>
+            <option value="4.5">? 4.5+</option>
           </select>
         </div>
 
@@ -657,7 +657,7 @@ function Dashboard() {
         <div className="dashboard-section-heading">
           <div>
             <span className="section-label">
-              📍 Nearby
+              ?? Nearby
             </span>
 
             <h2>
@@ -675,13 +675,13 @@ function Dashboard() {
               navigate("/restaurants")
             }
           >
-            See All →
+            See All ?
           </button>
         </div>
 
         {nearbyRestaurants.length === 0 ? (
           <div className="empty-dashboard-state">
-            <div>🔍</div>
+            <div>??</div>
 
             <h3>No restaurants found</h3>
 
@@ -723,7 +723,7 @@ function Dashboard() {
         <div className="dashboard-section-heading">
           <div>
             <span className="section-label">
-              🔥 Trending
+              ?? Trending
             </span>
 
             <h2>
@@ -739,7 +739,7 @@ function Dashboard() {
         <div className="dashboard-restaurant-grid">
           {popularRestaurants.length === 0 ? (
             <div className="empty-dashboard-state">
-              <div>🍽️</div>
+              <div>???</div>
 
               <h3>
                 No popular restaurants yet
@@ -765,12 +765,12 @@ function Dashboard() {
       <section className="recommended-section">
         <div className="recommended-content">
           <div className="recommended-icon">
-            ✨
+            ?
           </div>
 
           <div>
             <span className="section-label">
-              ✨ Smart ZestHub
+              ? Smart ZestHub
             </span>
 
             <h2>
@@ -801,7 +801,7 @@ function Dashboard() {
         <div className="dashboard-section-heading">
           <div>
             <span className="section-label">
-              👥 ZestHub Community
+              ?? ZestHub Community
             </span>
 
             <h2>
@@ -816,7 +816,7 @@ function Dashboard() {
 
         <div className="community-dashboard-card">
           <div className="community-big-icon">
-            💬
+            ??
           </div>
 
           <div>

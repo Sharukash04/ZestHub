@@ -6,7 +6,7 @@ import "./RestaurantDetails.css";
 // API
 // ==========================================
 
-const API_URL = "http://127.0.0.1:8000";
+import API_URL from "../config";
 
 // ==========================================
 // LOCAL IMAGES
@@ -1417,4 +1417,3 @@ function RestaurantDetails() {
 }
 
 export default RestaurantDetails;
-

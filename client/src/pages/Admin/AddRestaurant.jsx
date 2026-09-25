@@ -1,3 +1,4 @@
+import API_URL from "../../config";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AddRestaurant.css";
@@ -30,7 +31,7 @@ function AddRestaurant() {
   // ---------------------------------------------------------
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/categories/")
+    fetch(`${API_URL}/api/categories/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to load categories");
@@ -202,7 +203,7 @@ function AddRestaurant() {
 
       // Send authenticated request
       const response = await fetch(
-        "http://127.0.0.1:8000/api/restaurants/",
+        `${API_URL}/api/restaurants/`,
         {
           method: "POST",
 

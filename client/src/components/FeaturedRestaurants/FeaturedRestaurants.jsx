@@ -1,3 +1,4 @@
+import API_URL from "../../config";
 import "./FeaturedRestaurants.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -41,7 +42,7 @@ function FeaturedRestaurants() {
 
     // Image uploaded through FastAPI
     if (image.startsWith("/uploads/")) {
-      return `http://127.0.0.1:8000${image}`;
+      return `${API_URL}${image}`;
     }
 
     // Existing local image
@@ -50,7 +51,7 @@ function FeaturedRestaurants() {
 
   // Fetch restaurants
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/restaurants/")
+    fetch("${API_URL}/api/restaurants/")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch restaurants");

@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from "react";
+import API_URL from "../../config";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminDashboard.css";
 
@@ -23,7 +24,7 @@ function AdminDashboard() {
         setError("");
 
         const response = await fetch(
-          "http://127.0.0.1:8000/api/restaurants/"
+          "${API_URL}/api/restaurants/"
         );
 
         if (!response.ok) {
@@ -82,7 +83,7 @@ function AdminDashboard() {
       setMessage("");
 
       const response = await fetch(
-        `http://127.0.0.1:8000/api/restaurants/${restaurantToDelete.id}`,
+        `${API_URL}/api/restaurants/${restaurantToDelete.id}`,
         {
           method: "DELETE",
         }
@@ -125,7 +126,7 @@ function AdminDashboard() {
     }
 
     if (image.startsWith("/uploads/")) {
-      return `http://127.0.0.1:8000${image}`;
+      return `${API_URL}${image}`;
     }
 
     return image;
@@ -142,7 +143,7 @@ function AdminDashboard() {
       {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="admin-logo">
-          <span>🍽️</span>
+          <span>???</span>
           <h2>ZestHub</h2>
         </div>
 
@@ -151,7 +152,7 @@ function AdminDashboard() {
             className="active"
             onClick={() => navigate("/admin")}
           >
-            📊 Dashboard
+            ?? Dashboard
           </button>
 
           <button
@@ -159,19 +160,19 @@ function AdminDashboard() {
               navigate("/admin/restaurants/add")
             }
           >
-            ➕ Add Restaurant
+            ? Add Restaurant
           </button>
 
           <button
             onClick={() => navigate("/restaurants")}
           >
-            🍴 View Restaurants
+            ?? View Restaurants
           </button>
         </nav>
 
         <div className="admin-sidebar-bottom">
           <button onClick={() => navigate("/")}>
-            🏠 Back to ZestHub
+            ?? Back to ZestHub
           </button>
         </div>
       </aside>
@@ -182,7 +183,7 @@ function AdminDashboard() {
         <div className="admin-header">
           <div>
             <p className="admin-welcome">
-              Welcome back 👋
+              Welcome back ??
             </p>
 
             <h1>Admin Dashboard</h1>
@@ -205,7 +206,7 @@ function AdminDashboard() {
         {/* Messages */}
         {message && (
           <div className="admin-success-message">
-            <span>✓</span>
+            <span>?</span>
             {message}
           </div>
         )}
@@ -220,7 +221,7 @@ function AdminDashboard() {
         {/* Statistics */}
         <div className="admin-stats">
           <div className="stat-card">
-            <div className="stat-icon">🍽️</div>
+            <div className="stat-icon">???</div>
 
             <div>
               <span>Total Restaurants</span>
@@ -230,7 +231,7 @@ function AdminDashboard() {
           </div>
 
           <div className="stat-card">
-            <div className="stat-icon">📍</div>
+            <div className="stat-icon">??</div>
 
             <div>
               <span>Locations</span>
@@ -279,7 +280,7 @@ function AdminDashboard() {
             restaurants.length === 0 &&
             !error && (
               <div className="admin-empty">
-                <div className="empty-icon">🍽️</div>
+                <div className="empty-icon">???</div>
 
                 <h3>No Restaurants Yet</h3>
 
@@ -330,7 +331,7 @@ function AdminDashboard() {
                           />
                         ) : (
                           <div className="no-image">
-                            🍽️
+                            ???
                           </div>
                         )}
                       </div>
@@ -347,7 +348,7 @@ function AdminDashboard() {
                     {/* Location */}
                     <div className="restaurant-cell location-cell">
                       <span className="cell-icon">
-                        📍
+                        ??
                       </span>
 
                       <span>
@@ -363,7 +364,7 @@ function AdminDashboard() {
                     {/* Rating */}
                     <div className="restaurant-cell rating-cell">
                       <span className="rating-badge">
-                        ⭐ {getRating(restaurant)}
+                        ? {getRating(restaurant)}
                       </span>
                     </div>
 
@@ -401,7 +402,7 @@ function AdminDashboard() {
         <div className="delete-modal-overlay">
           <div className="delete-modal">
             <div className="delete-modal-icon">
-              ⚠️
+              ??
             </div>
 
             <h2>Delete Restaurant?</h2>

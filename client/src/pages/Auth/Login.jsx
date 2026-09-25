@@ -1,3 +1,4 @@
+import API_URL from "../../config";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -31,7 +32,7 @@ function Login() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/auth/login",
+        `${API_URL}/api/auth/login`,
         {
           email: formData.email.trim().toLowerCase(),
           password: formData.password,

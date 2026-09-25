@@ -1,3 +1,4 @@
+import API_URL from "../../config";
 import "./Restaurants.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +12,7 @@ function Restaurants() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/restaurants/")
+    fetch(`${API_URL}/api/restaurants/`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch restaurants");

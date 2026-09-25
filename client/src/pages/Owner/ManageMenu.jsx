@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./ManageMenu.css";
 
-const API_URL = "http://127.0.0.1:8000";
+import API_URL from "../../config";
 
 function ManageMenu() {
   const navigate = useNavigate();

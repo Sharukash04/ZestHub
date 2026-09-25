@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from "react";
+import API_URL from "../../config";
+import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import "./VerifyEmail.css";
@@ -28,7 +29,7 @@ function VerifyEmail() {
     const verifyEmail = async () => {
       try {
         const response = await axios.get(
-          `http://127.0.0.1:8000/api/auth/verify-email?token=${encodeURIComponent(
+          `${API_URL}/api/auth/verify-email?token=${encodeURIComponent(
             token
           )}`
         );
@@ -69,9 +70,9 @@ function VerifyEmail() {
     <div className="verify-page">
       <div className="verify-card">
         <div className="verify-icon">
-          {status === "loading" && "⏳"}
-          {status === "success" && "✅"}
-          {status === "error" && "⚠️"}
+          {status === "loading" && "?"}
+          {status === "success" && "?"}
+          {status === "error" && "??"}
         </div>
 
         <div className="verify-content">
@@ -103,7 +104,7 @@ function VerifyEmail() {
         </div>
 
         <div className="verify-brand">
-          <span>🍽️</span>
+          <span>???</span>
           <strong>ZestHub</strong>
         </div>
       </div>
