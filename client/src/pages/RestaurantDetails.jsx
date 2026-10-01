@@ -2,10 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./RestaurantDetails.css";
 
-// ==========================================
-// API
-// ==========================================
-
 import API_URL from "../config";
 
 // ==========================================
@@ -81,6 +77,31 @@ const normalizeImageName = (value) => {
 };
 
 // ==========================================
+// STAR DISPLAY
+// ==========================================
+
+const renderStars = (value = 0) => {
+  const numericValue = Number(value) || 0;
+
+  return (
+    <>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <span
+          key={star}
+          className={
+            star <= Math.round(numericValue)
+              ? "star filled"
+              : "star"
+          }
+        >
+          ★
+        </span>
+      ))}
+    </>
+  );
+};
+
+// ==========================================
 // RESTAURANT DETAILS
 // ==========================================
 
@@ -119,6 +140,22 @@ function RestaurantDetails() {
   const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   // ==========================================
+  // CURRENT USER
+  // ==========================================
+
+  let currentUser = null;
+
+  const storedUser = localStorage.getItem("zesthub_user");
+
+  if (storedUser) {
+    try {
+      currentUser = JSON.parse(storedUser);
+    } catch {
+      currentUser = null;
+    }
+  }
+
+  // ==========================================
   // FETCH RESTAURANT
   // ==========================================
 
@@ -127,6 +164,8 @@ function RestaurantDetails() {
 
     const loadRestaurant = async () => {
       try {
+        setLoading(true);
+
         const response = await fetch(
           `${API_URL}/api/restaurants/${id}`
         );
@@ -207,7 +246,7 @@ function RestaurantDetails() {
   }, [id]);
 
   // ==========================================
-  // FETCH RATING
+  // FETCH AVERAGE RATING
   // ==========================================
 
   useEffect(() => {
@@ -227,7 +266,7 @@ function RestaurantDetails() {
 
         if (!cancelled) {
           setRating(
-            data.average_rating || 0
+            Number(data.average_rating) || 0
           );
         }
       } catch (error) {
@@ -254,9 +293,7 @@ function RestaurantDetails() {
 
     const loadMyRating = async () => {
       const token =
-        localStorage.getItem(
-          "zesthub_token"
-        );
+        localStorage.getItem("zesthub_token");
 
       if (!token) {
         if (!cancelled) {
@@ -288,7 +325,7 @@ function RestaurantDetails() {
 
         if (!cancelled) {
           setMyRating(
-            data.rating || 0
+            Number(data.rating) || 0
           );
         }
       } catch (error) {
@@ -315,9 +352,7 @@ function RestaurantDetails() {
 
     const loadFavoriteStatus = async () => {
       const token =
-        localStorage.getItem(
-          "zesthub_token"
-        );
+        localStorage.getItem("zesthub_token");
 
       if (!token) {
         if (!cancelled) {
@@ -345,8 +380,7 @@ function RestaurantDetails() {
           return;
         }
 
-        const data =
-          await response.json();
+        const data = await response.json();
 
         if (!cancelled) {
           setIsFavorite(
@@ -386,45 +420,27 @@ function RestaurantDetails() {
 
     // Full URL
     if (
-      imageValue.startsWith(
-        "http://"
-      ) ||
-      imageValue.startsWith(
-        "https://"
-      )
+      imageValue.startsWith("http://") ||
+      imageValue.startsWith("https://")
     ) {
       return imageValue;
     }
 
     // Normalize filename
     const normalizedName =
-      normalizeImageName(
-        imageValue
-      );
+      normalizeImageName(imageValue);
 
     // Local image map
-    if (
-      imageMap[normalizedName]
-    ) {
-      return imageMap[
-        normalizedName
-      ];
+    if (imageMap[normalizedName]) {
+      return imageMap[normalizedName];
     }
 
     // Backend uploads path
-    if (
-      imageValue.startsWith(
-        "/uploads/"
-      )
-    ) {
+    if (imageValue.startsWith("/uploads/")) {
       return `${API_URL}${imageValue}`;
     }
 
-    if (
-      imageValue.startsWith(
-        "uploads/"
-      )
-    ) {
+    if (imageValue.startsWith("uploads/")) {
       return `${API_URL}/${imageValue}`;
     }
 
@@ -436,23 +452,21 @@ function RestaurantDetails() {
   // IMAGE ERROR FALLBACK
   // ==========================================
 
-  const handleImageError = (
-    event
-  ) => {
+  const handleImageError = (event) => {
     console.warn(
       "Restaurant image could not be loaded:",
       restaurant?.image
     );
 
     if (
-      event.currentTarget.dataset
-        .fallback === "true"
+      event.currentTarget.dataset.fallback ===
+      "true"
     ) {
       return;
     }
 
-    event.currentTarget.dataset
-      .fallback = "true";
+    event.currentTarget.dataset.fallback =
+      "true";
 
     event.currentTarget.src =
       restaurant1Image;
@@ -462,396 +476,406 @@ function RestaurantDetails() {
   // REFRESH REVIEWS
   // ==========================================
 
-  const refreshReviews =
-    async () => {
-      try {
-        const response =
-          await fetch(
-            `${API_URL}/api/reviews/restaurant/${id}`
-          );
+  const refreshReviews = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/reviews/restaurant/${id}`
+      );
 
-        if (!response.ok) {
-          throw new Error(
-            "Failed to fetch reviews"
-          );
-        }
-
-        const data =
-          await response.json();
-
-        setReviews(
-          Array.isArray(data)
-            ? data
-            : []
-        );
-      } catch (error) {
-        console.error(
-          "Reviews fetch error:",
-          error
+      if (!response.ok) {
+        throw new Error(
+          "Failed to fetch reviews"
         );
       }
-    };
+
+      const data = await response.json();
+
+      setReviews(
+        Array.isArray(data)
+          ? data
+          : []
+      );
+    } catch (error) {
+      console.error(
+        "Reviews fetch error:",
+        error
+      );
+    }
+  };
 
   // ==========================================
   // REFRESH RATING
   // ==========================================
 
-  const refreshRating =
-    async () => {
-      try {
-        const response =
-          await fetch(
-            `${API_URL}/api/ratings/restaurant/${id}`
-          );
+  const refreshRating = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/ratings/restaurant/${id}`
+      );
 
-        if (!response.ok) {
-          throw new Error(
-            "Failed to fetch rating"
-          );
-        }
-
-        const data =
-          await response.json();
-
-        setRating(
-          data.average_rating || 0
-        );
-      } catch (error) {
-        console.error(
-          "Rating fetch error:",
-          error
+      if (!response.ok) {
+        throw new Error(
+          "Failed to fetch rating"
         );
       }
-    };
+
+      const data = await response.json();
+
+      setRating(
+        Number(data.average_rating) || 0
+      );
+    } catch (error) {
+      console.error(
+        "Rating fetch error:",
+        error
+      );
+    }
+  };
 
   // ==========================================
   // HANDLE FAVORITE
   // ==========================================
 
-  const handleFavorite =
-    async () => {
-      const token =
-        localStorage.getItem(
-          "zesthub_token"
-        );
+  const handleFavorite = async () => {
+    const token =
+      localStorage.getItem("zesthub_token");
 
-      if (!token) {
-        alert(
-          "Please login to add restaurants to your favorites."
-        );
+    if (!token) {
+      alert(
+        "Please login to add restaurants to your favorites."
+      );
 
-        navigate("/login");
+      navigate("/login");
 
-        return;
-      }
+      return;
+    }
 
-      try {
-        setFavoriteLoading(
-          true
-        );
+    try {
+      setFavoriteLoading(true);
 
-        if (isFavorite) {
-          const response =
-            await fetch(
-              `${API_URL}/api/favorites/restaurant/${id}`,
-              {
-                method: "DELETE",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-
-          const data =
-            await response.json();
-
-          if (!response.ok) {
-            throw new Error(
-              data.detail ||
-                "Failed to remove favorite"
-            );
+      if (isFavorite) {
+        const response = await fetch(
+          `${API_URL}/api/favorites/restaurant/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
+        );
 
-          setIsFavorite(false);
-        } else {
-          const response =
-            await fetch(
-              `${API_URL}/api/favorites/restaurant/${id}`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
+        const data = await response.json();
 
-          const data =
-            await response.json();
-
-          if (!response.ok) {
-            throw new Error(
-              data.detail ||
-                "Failed to add favorite"
-            );
-          }
-
-          setIsFavorite(true);
+        if (!response.ok) {
+          throw new Error(
+            data.detail ||
+              "Failed to remove favorite"
+          );
         }
-      } catch (error) {
-        console.error(
-          "Favorite error:",
-          error
+
+        setIsFavorite(false);
+      } else {
+        const response = await fetch(
+          `${API_URL}/api/favorites/restaurant/${id}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
-        alert(
-          error.message ||
-            "Something went wrong."
-        );
-      } finally {
-        setFavoriteLoading(
-          false
-        );
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.detail ||
+              "Failed to add favorite"
+          );
+        }
+
+        setIsFavorite(true);
       }
-    };
+    } catch (error) {
+      console.error(
+        "Favorite error:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Something went wrong."
+      );
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
 
   // ==========================================
   // HANDLE RATING
   // ==========================================
 
-  const handleRating =
-    async (
-      selectedRating
-    ) => {
-      const token =
-        localStorage.getItem(
-          "zesthub_token"
-        );
+  const handleRating = async (
+    selectedRating
+  ) => {
+    const token =
+      localStorage.getItem("zesthub_token");
 
-      if (!token) {
-        alert(
-          "Please login to rate this restaurant."
-        );
+    if (!token) {
+      alert(
+        "Please login to rate this restaurant."
+      );
 
-        navigate("/login");
+      navigate("/login");
 
-        return;
-      }
+      return;
+    }
 
-      try {
-        setRatingLoading(
-          true
-        );
+    try {
+      setRatingLoading(true);
 
-        const response =
-          await fetch(
-            `${API_URL}/api/ratings/restaurant/${id}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type":
-                  "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify(
-                {
-                  rating:
-                    selectedRating,
-                }
-              ),
-            }
-          );
-
-        const data =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data.detail ||
-              "Failed to submit rating"
-          );
+      const response = await fetch(
+        `${API_URL}/api/ratings/restaurant/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            rating: selectedRating,
+          }),
         }
+      );
 
-        setMyRating(
-          selectedRating
-        );
+      const data = await response.json();
 
-        await refreshRating();
-      } catch (error) {
-        console.error(
-          "Rating error:",
-          error
-        );
-
-        alert(
-          error.message ||
-            "Failed to submit rating."
-        );
-      } finally {
-        setRatingLoading(
-          false
+      if (!response.ok) {
+        throw new Error(
+          data.detail ||
+            "Failed to submit rating"
         );
       }
-    };
+
+      setMyRating(selectedRating);
+
+      await refreshRating();
+    } catch (error) {
+      console.error(
+        "Rating error:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Failed to submit rating."
+      );
+    } finally {
+      setRatingLoading(false);
+    }
+  };
 
   // ==========================================
   // HANDLE REVIEW SUBMIT
   // ==========================================
 
-  const handleReviewSubmit =
-    async (event) => {
-      event.preventDefault();
+  const handleReviewSubmit = async (
+    event
+  ) => {
+    event.preventDefault();
 
-      const token =
-        localStorage.getItem(
-          "zesthub_token"
-        );
+    const token =
+      localStorage.getItem("zesthub_token");
 
-      if (!token) {
-        alert(
-          "Please login to write a review."
-        );
+    if (!token) {
+      alert(
+        "Please login to write a review."
+      );
 
-        navigate("/login");
+      navigate("/login");
 
-        return;
-      }
+      return;
+    }
 
-      const trimmedReview =
-        reviewText.trim();
+    const trimmedReview =
+      reviewText.trim();
 
-      if (!trimmedReview) {
-        alert(
-          "Please write a review."
-        );
+    if (!trimmedReview) {
+      alert("Please write a review.");
+      return;
+    }
 
-        return;
-      }
+    if (trimmedReview.length < 3) {
+      alert(
+        "Review must contain at least 3 characters."
+      );
 
-      if (
-        trimmedReview.length < 3
-      ) {
-        alert(
-          "Review must contain at least 3 characters."
-        );
+      return;
+    }
 
-        return;
-      }
+    try {
+      setReviewLoading(true);
 
-      try {
-        setReviewLoading(
-          true
-        );
-
-        const response =
-          await fetch(
-            `${API_URL}/api/reviews/`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type":
-                  "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify(
-                {
-                  restaurant_id:
-                    Number(id),
-                  comment:
-                    trimmedReview,
-                }
-              ),
-            }
-          );
-
-        const data =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data.detail ||
-              "Failed to submit review"
-          );
+      const response = await fetch(
+        `${API_URL}/api/reviews/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            restaurant_id: Number(id),
+            comment: trimmedReview,
+          }),
         }
+      );
 
-        setReviewText("");
+      const data = await response.json();
 
-        await refreshReviews();
-      } catch (error) {
-        console.error(
-          "Review error:",
-          error
-        );
-
-        alert(
-          error.message ||
-            "Failed to submit review."
-        );
-      } finally {
-        setReviewLoading(
-          false
+      if (!response.ok) {
+        throw new Error(
+          data.detail ||
+            "Failed to submit review"
         );
       }
-    };
+
+      setReviewText("");
+
+      await refreshReviews();
+    } catch (error) {
+      console.error(
+        "Review error:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Failed to submit review."
+      );
+    } finally {
+      setReviewLoading(false);
+    }
+  };
 
   // ==========================================
   // DELETE REVIEW
   // ==========================================
 
-  const handleDeleteReview =
-    async (reviewId) => {
-      const token =
-        localStorage.getItem(
-          "zesthub_token"
-        );
+  const handleDeleteReview = async (
+    reviewId
+  ) => {
+    const token =
+      localStorage.getItem("zesthub_token");
 
-      if (!token) {
-        return;
-      }
+    if (!token) {
+      return;
+    }
 
-      const confirmDelete =
-        window.confirm(
-          "Are you sure you want to delete this review?"
-        );
+    const confirmDelete =
+      window.confirm(
+        "Are you sure you want to delete this review?"
+      );
 
-      if (!confirmDelete) {
-        return;
-      }
+    if (!confirmDelete) {
+      return;
+    }
 
-      try {
-        const response =
-          await fetch(
-            `${API_URL}/api/reviews/${reviewId}`,
-            {
-              method: "DELETE",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-        const data =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data.detail ||
-              "Failed to delete review"
-          );
+    try {
+      const response = await fetch(
+        `${API_URL}/api/reviews/${reviewId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
+      );
 
-        await refreshReviews();
-      } catch (error) {
-        console.error(
-          "Delete review error:",
-          error
-        );
+      const data = await response.json();
 
-        alert(
-          error.message ||
-            "Failed to delete review."
+      if (!response.ok) {
+        throw new Error(
+          data.detail ||
+            "Failed to delete review"
         );
       }
-    };
+
+      await refreshReviews();
+    } catch (error) {
+      console.error(
+        "Delete review error:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Failed to delete review."
+      );
+    }
+  };
+
+  // ==========================================
+  // GET REVIEW USER NAME
+  // ==========================================
+
+  const getReviewUserName = (review) => {
+    return (
+      review?.user?.name ||
+      review?.user?.username ||
+      review?.user?.full_name ||
+      review?.username ||
+      review?.user_name ||
+      review?.name ||
+      "ZestHub User"
+    );
+  };
+
+  // ==========================================
+  // GET REVIEW COMMENT
+  // ==========================================
+
+  const getReviewComment = (review) => {
+    return (
+      review?.comment ||
+      review?.review ||
+      review?.text ||
+      ""
+    );
+  };
+
+  // ==========================================
+  // CHECK REVIEW OWNER
+  // ==========================================
+
+  const isMyReview = (review) => {
+    if (!currentUser || !review) {
+      return false;
+    }
+
+    const currentUserId =
+      currentUser.id ||
+      currentUser.user_id;
+
+    const reviewUserId =
+      review.user_id ||
+      review.userId ||
+      review.user?.id;
+
+    if (
+      currentUserId &&
+      reviewUserId
+    ) {
+      return (
+        Number(currentUserId) ===
+        Number(reviewUserId)
+      );
+    }
+
+    return false;
+  };
 
   // ==========================================
   // LOADING
@@ -877,46 +901,25 @@ function RestaurantDetails() {
     return (
       <div className="restaurant-details-page">
         <div className="restaurant-not-found">
-
           <h2>
             Restaurant not found
           </h2>
 
+          <p>
+            We could not find the restaurant
+            you are looking for.
+          </p>
+
           <button
             onClick={() =>
-              navigate(
-                "/restaurants"
-              )
+              navigate("/restaurants")
             }
           >
             Back to Restaurants
           </button>
-
         </div>
       </div>
     );
-  }
-
-  // ==========================================
-  // CURRENT USER
-  // ==========================================
-
-  let currentUser = null;
-
-  const storedUser =
-    localStorage.getItem(
-      "zesthub_user"
-    );
-
-  if (storedUser) {
-    try {
-      currentUser =
-        JSON.parse(
-          storedUser
-        );
-    } catch {
-      currentUser = null;
-    }
   }
 
   // ==========================================
@@ -938,9 +941,7 @@ function RestaurantDetails() {
             src={getRestaurantImage()}
             alt={restaurant.name}
             className="restaurant-main-image"
-            onError={
-              handleImageError
-            }
+            onError={handleImageError}
           />
 
           <div className="restaurant-hero-overlay">
@@ -959,7 +960,8 @@ function RestaurantDetails() {
 
               <p className="restaurant-location">
                 📍{" "}
-                {restaurant.location}
+                {restaurant.location ||
+                  "Location unavailable"}
               </p>
 
             </div>
@@ -972,12 +974,8 @@ function RestaurantDetails() {
                   ? "favorite-active"
                   : ""
               }`}
-              onClick={
-                handleFavorite
-              }
-              disabled={
-                favoriteLoading
-              }
+              onClick={handleFavorite}
+              disabled={favoriteLoading}
             >
               {favoriteLoading
                 ? "Saving..."
@@ -987,7 +985,6 @@ function RestaurantDetails() {
             </button>
 
           </div>
-
         </div>
 
         {/* ======================================
@@ -1003,7 +1000,6 @@ function RestaurantDetails() {
             </span>
 
             <div>
-
               <strong>
                 {restaurant.cuisine ||
                   "Various"}
@@ -1012,7 +1008,6 @@ function RestaurantDetails() {
               <small>
                 Cuisine
               </small>
-
             </div>
 
           </div>
@@ -1024,15 +1019,32 @@ function RestaurantDetails() {
             </span>
 
             <div>
-
               <strong>
                 Location
               </strong>
 
               <small>
-                {restaurant.location}
+                {restaurant.location ||
+                  "Not available"}
               </small>
+            </div>
 
+          </div>
+
+          <div className="info-item">
+
+            <span className="info-icon">
+              ⭐
+            </span>
+
+            <div>
+              <strong>
+                {Number(rating).toFixed(1)}
+              </strong>
+
+              <small>
+                Community Rating
+              </small>
             </div>
 
           </div>
@@ -1069,15 +1081,14 @@ function RestaurantDetails() {
             </span>
 
             <div>
-
               <h2>
                 ZestHub Community
               </h2>
 
               <p>
-                Share your experience and help other food lovers.
+                Share your experience and help
+                other food lovers.
               </p>
-
             </div>
 
           </div>
@@ -1091,196 +1102,140 @@ function RestaurantDetails() {
             <div className="section-header">
 
               <h3>
-                ⭐ Rate & Review
+                Restaurant Rating
               </h3>
 
-            </div>
+              <div className="average-rating">
 
-            {/* AVERAGE RATING */}
+                <span className="rating-number">
+                  {Number(rating).toFixed(1)}
+                </span>
 
-            <div className="restaurant-rating-summary">
-
-              <strong>
-                {Number(
-                  rating
-                ).toFixed(1)}
-              </strong>
-
-              <span>
-                / 5
-              </span>
-
-            </div>
-
-            {!currentUser ? (
-
-              <div className="login-review-message">
-
-                <p>
-                  Please login to rate and review this restaurant.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate(
-                      "/login"
-                    )
-                  }
-                >
-                  Login to Continue
-                </button>
+                <span className="rating-stars">
+                  {renderStars(rating)}
+                </span>
 
               </div>
 
-            ) : (
+            </div>
 
-              <>
+            <p className="rating-description">
+              {myRating
+                ? `You rated this restaurant ${myRating} out of 5.`
+                : "How would you rate this restaurant?"}
+            </p>
 
-                {/* MY RATING */}
+            <div className="rating-selector">
 
-                <div className="my-rating-section">
-
-                  <p>
-                    Your Rating
-                  </p>
-
-                  <div className="rating-buttons">
-
-                    {[1, 2, 3, 4, 5].map(
-                      (star) => (
-
-                        <button
-                          key={star}
-                          type="button"
-                          className={`rating-star ${
-                            myRating >=
-                            star
-                              ? "rating-star-active"
-                              : ""
-                          }`}
-                          onClick={() =>
-                            handleRating(
-                              star
-                            )
-                          }
-                          disabled={
-                            ratingLoading
-                          }
-                          aria-label={`Rate ${star} out of 5`}
-                        >
-                          {myRating >=
-                          star
-                            ? "★"
-                            : "☆"}
-                        </button>
-
-                      )
-                    )}
-
-                  </div>
-
-                  {myRating >
-                    0 && (
-
-                    <span className="rating-selected-message">
-                      You rated this restaurant{" "}
-                      {myRating}/5
-                    </span>
-
-                  )}
-
-                </div>
-
-                {/* REVIEW FORM */}
-
-                <form
-                  onSubmit={
-                    handleReviewSubmit
-                  }
-                >
-
-                  <textarea
-                    value={
-                      reviewText
+              {[1, 2, 3, 4, 5].map(
+                (star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    className={`rating-star-button ${
+                      star <= myRating
+                        ? "selected"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      handleRating(star)
                     }
-                    onChange={(
-                      event
-                    ) =>
-                      setReviewText(
-                        event.target
-                          .value
-                      )
-                    }
-                    placeholder="Tell the ZestHub community about your experience..."
-                    rows="5"
-                    maxLength="1000"
-                    disabled={
-                      reviewLoading
-                    }
-                  />
+                    disabled={ratingLoading}
+                    aria-label={`Rate ${star} out of 5`}
+                  >
+                    ★
+                  </button>
+                )
+              )}
 
-                  <div className="review-form-footer">
+            </div>
 
-                    <span>
-                      {
-                        reviewText.length
-                      }
-                      /1000
-                    </span>
-
-                    <button
-                      type="submit"
-                      disabled={
-                        reviewLoading ||
-                        reviewText
-                          .trim()
-                          .length < 3
-                      }
-                    >
-                      {reviewLoading
-                        ? "Posting..."
-                        : "Post Review"}
-                    </button>
-
-                  </div>
-
-                </form>
-
-              </>
-
+            {ratingLoading && (
+              <p className="rating-loading-text">
+                Saving your rating...
+              </p>
             )}
 
           </div>
 
           {/* ====================================
-              COMMUNITY REVIEWS
+              REVIEW FORM
           ==================================== */}
 
-          <div className="reviews-card">
+          <div className="review-form-card">
 
             <div className="section-header">
 
               <h3>
-                💬 Community Reviews
+                Write a Review
+              </h3>
+
+            </div>
+
+            <form
+              onSubmit={handleReviewSubmit}
+              className="review-form"
+            >
+
+              <textarea
+                value={reviewText}
+                onChange={(event) =>
+                  setReviewText(
+                    event.target.value
+                  )
+                }
+                placeholder="Share your experience with this restaurant..."
+                rows="5"
+                maxLength="1000"
+                disabled={reviewLoading}
+              />
+
+              <div className="review-form-footer">
+
+                <span className="review-character-count">
+                  {reviewText.length}/1000
+                </span>
+
+                <button
+                  type="submit"
+                  disabled={
+                    reviewLoading ||
+                    !reviewText.trim()
+                  }
+                >
+                  {reviewLoading
+                    ? "Posting..."
+                    : "Post Review"}
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+          {/* ====================================
+              REVIEWS LIST
+          ==================================== */}
+
+          <div className="reviews-section">
+
+            <div className="section-header">
+
+              <h3>
+                Customer Reviews
               </h3>
 
               <span className="review-count">
-
                 {reviews.length}{" "}
-
-                {reviews.length ===
-                1
+                {reviews.length === 1
                   ? "Review"
                   : "Reviews"}
-
               </span>
 
             </div>
 
-            {reviews.length ===
-            0 ? (
-
+            {reviews.length === 0 ? (
               <div className="no-reviews">
 
                 <div className="no-reviews-icon">
@@ -1292,99 +1247,107 @@ function RestaurantDetails() {
                 </h4>
 
                 <p>
-                  Be the first person to share your experience!
+                  Be the first person to
+                  share your experience!
                 </p>
 
               </div>
-
             ) : (
-
               <div className="reviews-list">
 
                 {reviews.map(
-                  (review) => {
+                  (review, index) => {
 
-                    const isOwnReview =
-                      currentUser &&
+                    const reviewComment =
+                      getReviewComment(
+                        review
+                      );
+
+                    const reviewRating =
                       Number(
-                        currentUser.id
-                      ) ===
-                        Number(
-                          review.user_id
-                        );
+                        review.rating
+                      ) || 0;
+
+                    const reviewId =
+                      review.id ||
+                      review.review_id ||
+                      index;
 
                     return (
-
-                      <div
-                        className="review-item"
-                        key={
-                          review.id
-                        }
+                      <article
+                        className="review-card"
+                        key={reviewId}
                       >
 
-                        <div className="review-avatar">
-                          👤
-                        </div>
+                        <div className="review-header">
 
-                        <div className="review-content">
+                          <div className="review-user">
 
-                          <div className="review-top">
+                            <div className="review-avatar">
+                              {getReviewUserName(
+                                review
+                              )
+                                .charAt(0)
+                                .toUpperCase()}
+                            </div>
 
                             <div>
 
-                              <h4>
-                                {review.user_name ||
-                                  review.user
-                                    ?.name ||
-                                  "ZestHub User"}
-                              </h4>
+                              <strong>
+                                {getReviewUserName(
+                                  review
+                                )}
+                              </strong>
 
-                              <span className="review-date">
-
+                              <small>
                                 {review.created_at
                                   ? new Date(
                                       review.created_at
                                     ).toLocaleDateString()
-                                  : ""}
-
-                              </span>
+                                  : "ZestHub Community"}
+                              </small>
 
                             </div>
 
-                            {isOwnReview && (
-
-                              <button
-                                type="button"
-                                className="delete-review-button"
-                                onClick={() =>
-                                  handleDeleteReview(
-                                    review.id
-                                  )
-                                }
-                              >
-                                Delete
-                              </button>
-
-                            )}
-
                           </div>
 
-                          <p>
-                            {
-                              review.comment
-                            }
-                          </p>
+                          {isMyReview(
+                            review
+                          ) && (
+                            <button
+                              type="button"
+                              className="delete-review-button"
+                              onClick={() =>
+                                handleDeleteReview(
+                                  reviewId
+                                )
+                              }
+                            >
+                              Delete
+                            </button>
+                          )}
 
                         </div>
 
-                      </div>
+                        {reviewRating > 0 && (
+                          <div className="review-rating">
+                            {renderStars(
+                              reviewRating
+                            )}
+                          </div>
+                        )}
 
+                        <p className="review-comment">
+                          {reviewComment ||
+                            "No comment provided."}
+                        </p>
+
+                      </article>
                     );
                   }
                 )}
 
               </div>
-
             )}
 
           </div>
@@ -1395,15 +1358,14 @@ function RestaurantDetails() {
             BACK BUTTON
         ====================================== */}
 
-        <div className="restaurant-back-section">
+        <div className="restaurant-details-actions">
 
           <button
-            className="back-button"
+            type="button"
             onClick={() =>
-              navigate(
-                "/restaurants"
-              )
+              navigate("/restaurants")
             }
+            className="back-to-restaurants"
           >
             ← Back to Restaurants
           </button>
