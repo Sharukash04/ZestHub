@@ -1,58 +1,179 @@
-import API_URL from "../../config";
 import "./Restaurants.css";
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import {
+  FaStar,
+  FaUtensils,
+  FaMapMarkerAlt,
+  FaArrowRight,
+} from "react-icons/fa";
+
+import API_URL from "../../config";
+
+import {
+  getRestaurantImage,
+  FALLBACK_RESTAURANT_IMAGE,
+} from "../../utils/restaurantImage";
 
 function Restaurants() {
   const [restaurants, setRestaurants] = useState([]);
   const [search, setSearch] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
+  /*
+  |--------------------------------------------------------------------------
+  | Fetch restaurants from FastAPI
+  |--------------------------------------------------------------------------
+  */
+
   useEffect(() => {
-    fetch(`${API_URL}/api/restaurants/`)
-      .then((response) => {
+    const fetchRestaurants = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(
+          `${API_URL}/api/restaurants/`
+        );
+
         if (!response.ok) {
           throw new Error("Failed to fetch restaurants");
         }
 
-        return response.json();
-      })
-      .then((data) => {
-        setRestaurants(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error(error);
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+          setRestaurants(data);
+        } else {
+          setRestaurants([]);
+        }
+      } catch (err) {
+        console.error("Restaurant fetch error:", err);
+
         setError("Unable to load restaurants");
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchRestaurants();
   }, []);
 
+  /*
+  |--------------------------------------------------------------------------
+  | Search restaurants
+  |--------------------------------------------------------------------------
+  */
+
   const filteredRestaurants = restaurants.filter((restaurant) => {
-    const searchText = search.toLowerCase();
+    const searchText = search.trim().toLowerCase();
+
+    // Show everything when search is empty
+    if (!searchText) {
+      return true;
+    }
+
+    const name =
+      restaurant.name?.toLowerCase() || "";
+
+    const cuisine =
+      restaurant.cuisine?.toLowerCase() || "";
+
+    const location =
+      restaurant.location?.toLowerCase() || "";
 
     return (
-      restaurant.name?.toLowerCase().includes(searchText) ||
-      restaurant.cuisine?.toLowerCase().includes(searchText) ||
-      restaurant.location?.toLowerCase().includes(searchText)
+      name.includes(searchText) ||
+      cuisine.includes(searchText) ||
+      location.includes(searchText)
     );
   });
+
+  /*
+  |--------------------------------------------------------------------------
+  | Get restaurant rating
+  |--------------------------------------------------------------------------
+  */
+
+  const getRating = (restaurant) => {
+    const rating =
+      restaurant.average_rating ??
+      restaurant.rating ??
+      0;
+
+    const numericRating = Number(rating);
+
+    if (!Number.isFinite(numericRating)) {
+      return "0.0";
+    }
+
+    return numericRating.toFixed(1);
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Get cuisine
+  |--------------------------------------------------------------------------
+  */
+
+  const getCuisine = (restaurant) => {
+    return restaurant.cuisine || "Various cuisines";
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Get location
+  |--------------------------------------------------------------------------
+  */
+
+  const getLocation = (restaurant) => {
+    return restaurant.location || "Location unavailable";
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Open restaurant details
+  |--------------------------------------------------------------------------
+  */
+
+  const openRestaurant = (restaurantId) => {
+    navigate(`/restaurant/${restaurantId}`);
+  };
 
   return (
     <section className="restaurants-page">
 
-      <div className="restaurants-header">
-        <h1>Discover Restaurants</h1>
+      {/* =========================================================
+          HEADER
+      ========================================================= */}
 
-        <p>
-          Find the best places to eat, explore and share your experience.
-        </p>
+      <div className="restaurants-header">
+
+        <div>
+          <h1>
+            Discover Restaurants
+          </h1>
+
+          <p>
+            Find the best places to eat, explore and share your experience.
+          </p>
+        </div>
+
       </div>
 
+
+      {/* =========================================================
+          SEARCH
+      ========================================================= */}
+
       <div className="restaurant-search">
+
         <input
           type="text"
           placeholder="Search restaurants, cuisines or locations..."
@@ -60,76 +181,225 @@ function Restaurants() {
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        <button>
+        <button type="button">
           Search
         </button>
+
       </div>
+
+
+      {/* =========================================================
+          FILTERS
+      ========================================================= */}
 
       <div className="restaurant-filters">
-        <button>All</button>
-        <button>Top Rated</button>
-        <button>Most Reviewed</button>
-        <button>Trending</button>
+
+        <button
+          type="button"
+          className="active"
+        >
+          All
+        </button>
+
+        <button type="button">
+          Top Rated
+        </button>
+
+        <button type="button">
+          Most Reviewed
+        </button>
+
+        <button type="button">
+          Trending
+        </button>
+
       </div>
+
+
+      {/* =========================================================
+          LOADING
+      ========================================================= */}
 
       {loading && (
-        <p className="restaurant-message">
+        <div className="restaurant-message">
           Loading restaurants...
-        </p>
+        </div>
       )}
 
-      {error && (
-        <p className="restaurant-message error">
+
+      {/* =========================================================
+          ERROR
+      ========================================================= */}
+
+      {!loading && error && (
+        <div className="restaurant-message error">
           {error}
-        </p>
+        </div>
       )}
 
-      {!loading && !error && filteredRestaurants.length === 0 && (
-        <p className="restaurant-message">
-          No restaurants found.
-        </p>
-      )}
 
-      <div className="restaurants-grid">
+      {/* =========================================================
+          NO RESULTS
+      ========================================================= */}
 
-        {filteredRestaurants.map((restaurant) => (
+      {!loading &&
+        !error &&
+        filteredRestaurants.length === 0 && (
+          <div className="restaurant-message">
+            No restaurants found.
+          </div>
+        )}
 
-          <div className="listing-card" key={restaurant.id}>
 
-            <div className="listing-image">
-              🍽️
-            </div>
+      {/* =========================================================
+          RESTAURANT GRID
+      ========================================================= */}
 
-            <div className="listing-info">
+      {!loading &&
+        !error &&
+        filteredRestaurants.length > 0 && (
 
-              <h2>{restaurant.name}</h2>
+          <div className="restaurants-grid">
 
-              <div className="listing-rating">
-                ⭐ {restaurant.rating}
-              </div>
+            {filteredRestaurants.map((restaurant) => {
 
-              <p>
-                📍 {restaurant.location}
-              </p>
+              const image = getRestaurantImage(
+                restaurant.image
+              );
 
-              <p>
-                🍴 {restaurant.cuisine}
-              </p>
+              const rating = getRating(
+                restaurant
+              );
 
-              <button
-                className="details-button"
-                onClick={() => navigate(`/restaurant/${restaurant.id}`)}
-              >
-                View Details
-              </button>
+              return (
 
-            </div>
+                <article
+                  className="restaurant-card"
+                  key={restaurant.id}
+                >
+
+                  {/* =================================================
+                      IMAGE
+                  ================================================= */}
+
+                  <div className="restaurant-card-image">
+
+                    <img
+                      src={image}
+                      alt={
+                        restaurant.name ||
+                        "Restaurant"
+                      }
+
+                      onError={(event) => {
+                        /*
+                        Prevent infinite image-error loop.
+                        */
+
+                        if (
+                          event.currentTarget.src !==
+                          FALLBACK_RESTAURANT_IMAGE
+                        ) {
+                          event.currentTarget.src =
+                            FALLBACK_RESTAURANT_IMAGE;
+                        }
+                      }}
+                    />
+
+
+                    {/* =============================================
+                        RATING
+                    ============================================= */}
+
+                    <div className="restaurant-rating">
+
+                      <FaStar />
+
+                      <span>
+                        {rating}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  {/* =================================================
+                      RESTAURANT CONTENT
+                  ================================================= */}
+
+                  <div className="restaurant-card-content">
+
+                    {/* Restaurant name */}
+
+                    <h2>
+                      {restaurant.name ||
+                        "Restaurant"}
+                    </h2>
+
+
+                    {/* Cuisine */}
+
+                    <div className="restaurant-detail">
+
+                      <FaUtensils />
+
+                      <span>
+                        {getCuisine(
+                          restaurant
+                        )}
+                      </span>
+
+                    </div>
+
+
+                    {/* Location */}
+
+                    <div className="restaurant-detail">
+
+                      <FaMapMarkerAlt />
+
+                      <span>
+                        {getLocation(
+                          restaurant
+                        )}
+                      </span>
+
+                    </div>
+
+
+                    {/* =================================================
+                        VIEW RESTAURANT
+                    ================================================= */}
+
+                    <button
+                      type="button"
+                      className="view-restaurant-button"
+
+                      onClick={() =>
+                        openRestaurant(
+                          restaurant.id
+                        )
+                      }
+                    >
+
+                      <span>
+                        View Restaurant
+                      </span>
+
+                      <FaArrowRight />
+
+                    </button>
+
+                  </div>
+
+                </article>
+
+              );
+            })}
 
           </div>
-
-        ))}
-
-      </div>
+        )}
 
     </section>
   );

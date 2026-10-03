@@ -19,11 +19,19 @@ router = APIRouter(
 
 
 # =========================================================
-# REQUEST SCHEMA
+# REQUEST SCHEMAS
 # =========================================================
 
 class RatingCreate(BaseModel):
     restaurant_id: int
+    rating: float = Field(
+        ...,
+        ge=1,
+        le=5
+    )
+
+
+class RestaurantRatingCreate(BaseModel):
     rating: float = Field(
         ...,
         ge=1,
@@ -47,7 +55,7 @@ def update_average_rating(
     if not ratings:
         average = 0.0
     else:
-        total = sum(r.rating for r in ratings)
+        total = sum(float(r.rating) for r in ratings)
         average = round(total / len(ratings), 1)
 
     restaurant = db.query(Restaurant).filter(
@@ -86,7 +94,7 @@ def get_restaurant_rating(
 
     average = (
         round(
-            sum(r.rating for r in ratings) / len(ratings),
+            sum(float(r.rating) for r in ratings) / len(ratings),
             1
         )
         if ratings
@@ -124,12 +132,106 @@ def get_my_rating(
 
     return {
         "has_rated": True,
-        "rating": rating.rating
+        "rating": float(rating.rating)
     }
 
 
 # =========================================================
-# CREATE OR UPDATE RATING
+# CREATE / UPDATE RATING
+#
+# React uses:
+# POST /api/ratings/restaurant/{restaurant_id}
+#
+# Body:
+# {
+#     "rating": 4
+# }
+# =========================================================
+
+@router.post("/restaurant/{restaurant_id}")
+def create_or_update_restaurant_rating(
+    restaurant_id: int,
+    rating_data: RestaurantRatingCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+
+    # Check restaurant
+    restaurant = db.query(Restaurant).filter(
+        Restaurant.id == restaurant_id
+    ).first()
+
+    if not restaurant:
+        raise HTTPException(
+            status_code=404,
+            detail="Restaurant not found"
+        )
+
+    # Check existing user rating
+    existing_rating = db.query(Rating).filter(
+        Rating.user_id == current_user.id,
+        Rating.restaurant_id == restaurant_id
+    ).first()
+
+    # -----------------------------------------------------
+    # UPDATE EXISTING RATING
+    # -----------------------------------------------------
+
+    if existing_rating:
+
+        existing_rating.rating = rating_data.rating
+
+        db.flush()
+
+        average = update_average_rating(
+            restaurant_id,
+            db
+        )
+
+        db.commit()
+        db.refresh(existing_rating)
+
+        return {
+            "message": "Rating updated successfully",
+            "rating": float(existing_rating.rating),
+            "average_rating": average
+        }
+
+    # -----------------------------------------------------
+    # CREATE NEW RATING
+    # -----------------------------------------------------
+
+    new_rating = Rating(
+        rating=rating_data.rating,
+        user_id=current_user.id,
+        restaurant_id=restaurant_id
+    )
+
+    db.add(new_rating)
+
+    db.flush()
+
+    average = update_average_rating(
+        restaurant_id,
+        db
+    )
+
+    db.commit()
+    db.refresh(new_rating)
+
+    return {
+        "message": "Rating added successfully",
+        "rating": float(new_rating.rating),
+        "average_rating": average
+    }
+
+
+# =========================================================
+# ORIGINAL CREATE / UPDATE ENDPOINT
+#
+# POST /api/ratings/
+#
+# Kept for compatibility with other parts of ZestHub.
 # =========================================================
 
 @router.post("/")
@@ -158,16 +260,19 @@ def create_or_update_rating(
 
         existing_rating.rating = rating_data.rating
 
+        db.flush()
+
         average = update_average_rating(
             rating_data.restaurant_id,
             db
         )
 
         db.commit()
+        db.refresh(existing_rating)
 
         return {
             "message": "Rating updated successfully",
-            "rating": existing_rating.rating,
+            "rating": float(existing_rating.rating),
             "average_rating": average
         }
 
@@ -179,8 +284,6 @@ def create_or_update_rating(
 
     db.add(new_rating)
 
-    # Flush so the new rating participates
-    # in the average calculation
     db.flush()
 
     average = update_average_rating(
@@ -193,7 +296,7 @@ def create_or_update_rating(
 
     return {
         "message": "Rating added successfully",
-        "rating": new_rating.rating,
+        "rating": float(new_rating.rating),
         "average_rating": average
     }
 

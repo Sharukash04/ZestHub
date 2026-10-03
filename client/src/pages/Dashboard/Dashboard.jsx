@@ -1,844 +1,991 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+﻿import API_URL from "../../config";
 import "./Dashboard.css";
 
-import biryaniImage from "../../assets/images/biryani.jpg";
-import burgerImage from "../../assets/images/burger.jpg";
-import cafeImage from "../../assets/images/cafe.jpg";
-import dessertsImage from "../../assets/images/desserts.jpg";
-import heroFoodImage from "../../assets/images/hero-food.jpg";
-import keralaFoodImage from "../../assets/images/Kerala Food Court.jpg";
-import pizzaImage from "../../assets/images/pizza.jpg";
-import restaurant1Image from "../../assets/images/restaurant1.jpg";
-import restaurant2Image from "../../assets/images/restaurant2.jpg";
-import restaurant3Image from "../../assets/images/restaurant3.jpg";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-import API_URL from "../../config";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 
-const imageMap = {
-  "biryani.jpg": biryaniImage,
-  "burger.jpg": burgerImage,
-  "cafe.jpg": cafeImage,
-  "desserts.jpg": dessertsImage,
-  "hero-food.jpg": heroFoodImage,
-  "kerala food court.jpg": keralaFoodImage,
-  "pizza.jpg": pizzaImage,
-  "restaurant1.jpg": restaurant1Image,
-  "restaurant2.jpg": restaurant2Image,
-  "restaurant3.jpg": restaurant3Image,
+import {
+  FaArrowRight,
+  FaCompass,
+  FaComments,
+  FaFire,
+  FaHeart,
+  FaMapMarkerAlt,
+  FaSearch,
+  FaSignOutAlt,
+  FaStar,
+  FaUtensils,
+  FaUser,
+  FaUsers,
+} from "react-icons/fa";
 
-  "barbeque-nation.jpg": restaurant1Image,
-  "barbeque nation.jpg": restaurant1Image,
-
-  "burger-king.jpg": burgerImage,
-  "burger king.jpg": burgerImage,
-
-  "chinese-wok.jpg": restaurant2Image,
-  "chinese wok.jpg": restaurant2Image,
-
-  "dominos.jpg": pizzaImage,
-  "domino's.jpg": pizzaImage,
-
-  "hotel-aruvi.jpg": restaurant3Image,
-  "hotel aruvi.jpg": restaurant3Image,
-
-  "kerala-food-court.jpg": keralaFoodImage,
-
-  "pizza-hut.jpg": pizzaImage,
-  "pizza hut.jpg": pizzaImage,
-
-  "restaurant.jpg": restaurant1Image,
-};
-
-const normalizeImageName = (value) => {
-  if (!value) {
-    return "";
-  }
-
-  return value
-    .split("/")
-    .pop()
-    .trim()
-    .toLowerCase();
-};
-
-function getStoredUser() {
-  const storedUser = localStorage.getItem("zesthub_user");
-
-  if (!storedUser) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(storedUser);
-  } catch {
-    localStorage.removeItem("zesthub_user");
-    return null;
-  }
-}
+import {
+  getRestaurantImage,
+  FALLBACK_RESTAURANT_IMAGE,
+} from "../../utils/restaurantImage";
 
 function Dashboard() {
   const navigate = useNavigate();
 
-  const [user] = useState(getStoredUser);
-  const [restaurants, setRestaurants] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // =====================================================
+  // STATE
+  // =====================================================
 
-  const [search, setSearch] = useState("");
-  const [selectedCuisine, setSelectedCuisine] = useState("All");
-  const [selectedLocation, setSelectedLocation] = useState("All");
-  const [minimumRating, setMinimumRating] = useState(0);
+  const [restaurants, setRestaurants] =
+    useState([]);
 
-  // ==========================================
-  // FETCH RESTAURANTS
-  // ==========================================
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  const [search, setSearch] =
+    useState("");
+
+  const [cuisine, setCuisine] =
+    useState("All");
+
+  const [location, setLocation] =
+    useState("All");
+
+  const [minimumRating, setMinimumRating] =
+    useState("All");
+
+  const [user, setUser] =
+    useState(null);
+
+  // =====================================================
+  // LOAD USER
+  // =====================================================
 
   useEffect(() => {
-    let cancelled = false;
+    try {
+      const savedUser =
+        localStorage.getItem(
+          "zesthub_user"
+        );
 
-    const fetchRestaurants = async () => {
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
+    } catch (error) {
+      console.error(
+        "Unable to load user:",
+        error
+      );
+    }
+  }, []);
+
+  // =====================================================
+  // FETCH RESTAURANTS
+  // =====================================================
+
+  useEffect(() => {
+    const loadRestaurants = async () => {
       try {
         setLoading(true);
-
-        const token = localStorage.getItem("zesthub_token");
+        setError("");
 
         const response = await fetch(
-          `${API_URL}/api/restaurants`,
-          {
-            headers: token
-              ? {
-                  Authorization: `Bearer ${token}`,
-                }
-              : {},
-          }
+          `${API_URL}/api/restaurants/`
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch restaurants");
+          throw new Error(
+            "Failed to fetch restaurants"
+          );
         }
 
-        const data = await response.json();
+        const data =
+          await response.json();
 
-        if (cancelled) {
-          return;
-        }
-
-        if (Array.isArray(data)) {
-          setRestaurants(data);
-        } else if (Array.isArray(data.value)) {
-          setRestaurants(data.value);
-        } else {
-          setRestaurants([]);
-        }
+        setRestaurants(
+          Array.isArray(data)
+            ? data
+            : []
+        );
       } catch (error) {
-        console.error("Restaurant fetch error:", error);
+        console.error(
+          "Dashboard restaurant error:",
+          error
+        );
 
-        if (!cancelled) {
-          setRestaurants([]);
-        }
+        setError(
+          "Unable to load restaurants."
+        );
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
-    fetchRestaurants();
-
-    return () => {
-      cancelled = true;
-    };
+    loadRestaurants();
   }, []);
 
-  // ==========================================
-  // CUISINES
-  // ==========================================
+  // =====================================================
+  // CUISINE OPTIONS
+  // =====================================================
 
-  const cuisines = useMemo(() => {
+  const cuisineOptions = useMemo(() => {
     const values = restaurants
-      .map((restaurant) => restaurant.cuisine)
+      .map(
+        (restaurant) =>
+          restaurant.cuisine
+      )
+      .filter(Boolean)
+      .map((value) =>
+        String(value).trim()
+      )
       .filter(Boolean);
 
-    return ["All", ...new Set(values)];
+    return [
+      "All",
+      ...new Set(values),
+    ];
   }, [restaurants]);
 
-  // ==========================================
-  // LOCATIONS
-  // ==========================================
+  // =====================================================
+  // LOCATION OPTIONS
+  // =====================================================
 
-  const locations = useMemo(() => {
+  const locationOptions = useMemo(() => {
     const values = restaurants
-      .map((restaurant) => restaurant.location)
+      .map(
+        (restaurant) =>
+          restaurant.location
+      )
+      .filter(Boolean)
+      .map((value) =>
+        String(value).trim()
+      )
       .filter(Boolean);
 
-    return ["All", ...new Set(values)];
+    return [
+      "All",
+      ...new Set(values),
+    ];
   }, [restaurants]);
 
-  // ==========================================
+  // =====================================================
   // FILTER RESTAURANTS
-  // ==========================================
+  // =====================================================
 
-  const filteredRestaurants = useMemo(() => {
-    const query = search.trim().toLowerCase();
+  const filteredRestaurants =
+    useMemo(() => {
+      const searchText =
+        search
+          .trim()
+          .toLowerCase();
 
-    return restaurants.filter((restaurant) => {
-      const name =
-        restaurant.name?.toLowerCase() || "";
+      return restaurants.filter(
+        (restaurant) => {
+          const name =
+            String(
+              restaurant.name || ""
+            ).toLowerCase();
 
-      const location =
-        restaurant.location?.toLowerCase() || "";
+          const restaurantCuisine =
+            String(
+              restaurant.cuisine || ""
+            ).toLowerCase();
 
-      const cuisine =
-        restaurant.cuisine?.toLowerCase() || "";
+          const restaurantLocation =
+            String(
+              restaurant.location || ""
+            ).toLowerCase();
 
-      const description =
-        restaurant.description?.toLowerCase() || "";
+          const matchesSearch =
+            !searchText ||
+            name.includes(
+              searchText
+            ) ||
+            restaurantCuisine.includes(
+              searchText
+            ) ||
+            restaurantLocation.includes(
+              searchText
+            );
 
-      const matchesSearch =
-        !query ||
-        name.includes(query) ||
-        location.includes(query) ||
-        cuisine.includes(query) ||
-        description.includes(query);
+          const matchesCuisine =
+            cuisine === "All" ||
+            restaurant.cuisine ===
+              cuisine;
 
-      const matchesCuisine =
-        selectedCuisine === "All" ||
-        restaurant.cuisine === selectedCuisine;
+          const matchesLocation =
+            location === "All" ||
+            restaurant.location ===
+              location;
 
-      const matchesLocation =
-        selectedLocation === "All" ||
-        restaurant.location === selectedLocation;
+          const rating = Number(
+            restaurant.average_rating ??
+              restaurant.rating ??
+              0
+          );
 
-      const restaurantRating = Number(
-        restaurant.rating ??
-          restaurant.average_rating ??
-          0
+          let matchesRating = true;
+
+          if (
+            minimumRating === "3"
+          ) {
+            matchesRating =
+              rating >= 3;
+          }
+
+          if (
+            minimumRating === "4"
+          ) {
+            matchesRating =
+              rating >= 4;
+          }
+
+          if (
+            minimumRating === "4.5"
+          ) {
+            matchesRating =
+              rating >= 4.5;
+          }
+
+          return (
+            matchesSearch &&
+            matchesCuisine &&
+            matchesLocation &&
+            matchesRating
+          );
+        }
       );
+    }, [
+      restaurants,
+      search,
+      cuisine,
+      location,
+      minimumRating,
+    ]);
 
-      const matchesRating =
-        restaurantRating >= minimumRating;
+  // =====================================================
+  // NEARBY
+  // =====================================================
 
-      return (
-        matchesSearch &&
-        matchesCuisine &&
-        matchesLocation &&
-        matchesRating
-      );
-    });
-  }, [
-    restaurants,
-    search,
-    selectedCuisine,
-    selectedLocation,
-    minimumRating,
-  ]);
+  const nearbyRestaurants =
+    filteredRestaurants.slice(
+      0,
+      5
+    );
 
-  // ==========================================
-  // NEARBY RESTAURANTS
-  // ==========================================
+  // =====================================================
+  // TRENDING
+  // =====================================================
 
-  const nearbyRestaurants = useMemo(() => {
-    return filteredRestaurants.slice(0, 5);
-  }, [filteredRestaurants]);
-
-  // ==========================================
-  // POPULAR RESTAURANTS
-  // ==========================================
-
-  const popularRestaurants = useMemo(() => {
-    return [...filteredRestaurants]
+  const trendingRestaurants =
+    [...restaurants]
       .sort((a, b) => {
-        const ratingA = Number(
-          a.rating ?? a.average_rating ?? 0
-        );
+        const ratingA =
+          Number(
+            a.average_rating ??
+              a.rating ??
+              0
+          );
 
-        const ratingB = Number(
-          b.rating ?? b.average_rating ?? 0
-        );
+        const ratingB =
+          Number(
+            b.average_rating ??
+              b.rating ??
+              0
+          );
 
         return ratingB - ratingA;
       })
       .slice(0, 5);
-  }, [filteredRestaurants]);
 
-  // ==========================================
-  // IMAGE
-  // ==========================================
+  // =====================================================
+  // LOGOUT
+  // =====================================================
 
-  const getRestaurantImage = (restaurant) => {
-    if (!restaurant?.image) {
-      return restaurant1Image;
-    }
-
-    const imageValue = String(
-      restaurant.image
-    ).trim();
-
-    const normalizedName =
-      normalizeImageName(imageValue);
-
-    if (imageMap[normalizedName]) {
-      return imageMap[normalizedName];
-    }
-
-    if (
-      imageValue.startsWith("http://") ||
-      imageValue.startsWith("https://")
-    ) {
-      return imageValue;
-    }
-
-    if (imageValue.startsWith("/uploads/")) {
-      return `${API_URL}${imageValue}`;
-    }
-
-    if (imageValue.startsWith("uploads/")) {
-      return `${API_URL}/${imageValue}`;
-    }
-
-    return `${API_URL}/uploads/${imageValue}`;
-  };
-
-  // ==========================================
-  // IMAGE FALLBACK
-  // ==========================================
-
-  const handleImageError = (event) => {
-    if (
-      event.currentTarget.dataset.fallback === "true"
-    ) {
-      return;
-    }
-
-    event.currentTarget.dataset.fallback = "true";
-    event.currentTarget.src = restaurant1Image;
-  };
-
-  // ==========================================
-  // CLEAR FILTERS
-  // ==========================================
-
-  const clearFilters = () => {
-    setSearch("");
-    setSelectedCuisine("All");
-    setSelectedLocation("All");
-    setMinimumRating(0);
-  };
-
-  const hasFilters =
-    Boolean(search) ||
-    selectedCuisine !== "All" ||
-    selectedLocation !== "All" ||
-    minimumRating > 0;
-
-  // ==========================================
-  // RESTAURANT CARD
-  // ==========================================
-
-  const RestaurantCard = ({ restaurant }) => {
-    const restaurantRating = Number(
-      restaurant.rating ??
-        restaurant.average_rating ??
-        0
+  const handleLogout = () => {
+    localStorage.removeItem(
+      "zesthub_token"
     );
 
+    localStorage.removeItem(
+      "zesthub_user"
+    );
+
+    navigate("/login");
+  };
+
+  // =====================================================
+  // USER NAME
+  // =====================================================
+
+  const userName =
+    user?.name ||
+    user?.username ||
+    user?.full_name ||
+    "ZestHub User";
+
+  // =====================================================
+  // RESTAURANT CARD
+  // =====================================================
+
+  const RestaurantCard = ({
+    restaurant,
+  }) => {
+    const rating =
+      Number(
+        restaurant.average_rating ??
+          restaurant.rating ??
+          0
+      );
+
+    const image =
+      getRestaurantImage(
+        restaurant.image
+      );
+
     return (
-      <div
-        className="dashboard-restaurant-card"
-        onClick={() =>
-          navigate(`/restaurant/${restaurant.id}`)
-        }
-      >
-        <div className="dashboard-restaurant-image-wrapper">
+      <div className="dashboard-restaurant-card">
+
+        {/* IMAGE */}
+
+        <div className="dashboard-card-image-wrapper">
+
           <img
-            src={getRestaurantImage(restaurant)}
-            alt={restaurant.name}
-            className="dashboard-restaurant-image"
-            onError={handleImageError}
+            src={image}
+            alt={
+              restaurant.name ||
+              "Restaurant"
+            }
+            className="dashboard-card-image"
+            onError={(event) => {
+              event.currentTarget.onerror =
+                null;
+
+              event.currentTarget.src =
+                FALLBACK_RESTAURANT_IMAGE;
+            }}
           />
 
-          <span className="dashboard-rating">
-            ? {restaurantRating.toFixed(1)}
-          </span>
+          {/* RATING */}
+
+          <div className="dashboard-rating">
+            <FaStar />
+
+            <span>
+              {rating > 0
+                ? rating.toFixed(1)
+                : "New"}
+            </span>
+          </div>
+
         </div>
 
-        <div className="dashboard-restaurant-content">
-          <h3>{restaurant.name}</h3>
+        {/* CONTENT */}
 
-          <p className="dashboard-cuisine">
-            ?? {restaurant.cuisine || "Various"}
-          </p>
+        <div className="dashboard-card-content">
 
-          <p className="dashboard-location">
-            ?? {restaurant.location || "Location unavailable"}
-          </p>
+          <h3>
+            {restaurant.name}
+          </h3>
 
-          <button
-            className="view-restaurant-button"
-            onClick={(event) => {
-              event.stopPropagation();
+          <div className="dashboard-card-info">
 
-              navigate(
-                `/restaurant/${restaurant.id}`
-              );
-            }}
+            <FaUtensils />
+
+            <span>
+              {restaurant.cuisine ||
+                "Restaurant"}
+            </span>
+
+          </div>
+
+          <div className="dashboard-card-info">
+
+            <FaMapMarkerAlt />
+
+            <span>
+              {restaurant.location ||
+                "Location unavailable"}
+            </span>
+
+          </div>
+
+          <Link
+            to={`/restaurant/${restaurant.id}`}
+            className="dashboard-view-button"
           >
-            View Restaurant ?
-          </button>
+            View Restaurant
+
+            <FaArrowRight />
+
+          </Link>
+
         </div>
+
       </div>
     );
   };
 
-  // ==========================================
-  // LOADING
-  // ==========================================
-
-  if (loading) {
-    return (
-      <div className="dashboard-page">
-        <div className="dashboard-loading">
-          <div className="dashboard-loading-icon">
-            ???
-          </div>
-
-          <h2>Loading your ZestHub...</h2>
-
-          <p>
-            Finding delicious restaurants for you.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
-  // MAIN DASHBOARD
-  // ==========================================
+  // =====================================================
+  // UI
+  // =====================================================
 
   return (
     <div className="dashboard-page">
-      {/* ======================================
-          HEADER
-      ====================================== */}
 
-      <div className="dashboard-header">
-        <div>
-          <span className="dashboard-welcome-label">
-            Welcome back ??
+      {/* =================================================
+          NAVBAR
+      ================================================= */}
+
+      <header className="dashboard-navbar">
+
+        <Link
+          to="/dashboard"
+          className="dashboard-logo"
+        >
+          <FaUtensils />
+
+          <span>
+            ZestHub
           </span>
 
-          <h1>
-            {user?.name
-              ? `Hello, ${user.name}!`
-              : "Welcome to ZestHub!"}
-          </h1>
+        </Link>
+
+        <nav className="dashboard-nav-links">
+
+          <Link to="/dashboard">
+            Dashboard
+          </Link>
+
+          <Link to="/restaurants">
+            Restaurants
+          </Link>
+
+          <Link to="/profile">
+            Profile
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="dashboard-logout"
+          >
+            <FaSignOutAlt />
+
+            Logout
+
+          </button>
+
+        </nav>
+
+      </header>
+
+      {/* =================================================
+          MAIN
+      ================================================= */}
+
+      <main className="dashboard-container">
+
+        {/* =================================================
+            WELCOME
+        ================================================= */}
+
+        <section className="dashboard-welcome">
+
+          <div>
+
+            <span className="dashboard-small-label">
+              Welcome back!
+            </span>
+
+            <h1>
+              Hello, {userName}!
+            </h1>
+
+            <p>
+              Discover amazing food and
+              restaurants around you.
+            </p>
+
+          </div>
+
+          <Link
+            to="/profile"
+            className="dashboard-profile-button"
+          >
+            <FaUser />
+
+            Profile
+
+          </Link>
+
+        </section>
+
+        {/* =================================================
+            QUICK ACTIONS
+        ================================================= */}
+
+        <section className="dashboard-quick-grid">
+
+          {/* FAVORITES */}
+
+          <div className="dashboard-quick-card">
+
+            <div className="dashboard-quick-icon">
+              <FaHeart />
+            </div>
+
+            <h3>
+              Favorites
+            </h3>
+
+            <p>
+              Your saved restaurants
+            </p>
+
+            <Link to="/favorites">
+
+              View Favorites
+
+              <FaArrowRight />
+
+            </Link>
+
+          </div>
+
+          {/* COMMUNITY */}
+
+          <div className="dashboard-quick-card">
+
+            <div className="dashboard-quick-icon">
+              <FaUsers />
+            </div>
+
+            <h3>
+              Community
+            </h3>
+
+            <p>
+              See what food lovers
+              are saying
+            </p>
+
+            <Link to="/reviews">
+
+              Explore Community
+
+              <FaArrowRight />
+
+            </Link>
+
+          </div>
+
+          {/* POPULAR */}
+
+          <div className="dashboard-quick-card">
+
+            <div className="dashboard-quick-icon">
+              <FaFire />
+            </div>
+
+            <h3>
+              Popular
+            </h3>
+
+            <p>
+              Most famous restaurants
+            </p>
+
+            <Link to="/restaurants">
+
+              Explore Popular
+
+              <FaArrowRight />
+
+            </Link>
+
+          </div>
+
+        </section>
+
+        {/* =================================================
+            DISCOVER
+        ================================================= */}
+
+        <section className="dashboard-discover">
+
+          <div className="dashboard-section-heading">
+
+            <div>
+
+              <span className="dashboard-small-label">
+
+                <FaCompass />
+
+                Discover
+
+              </span>
+
+              <h2>
+                Find Your Perfect Restaurant
+              </h2>
+
+              <p>
+                Search by restaurant,
+                cuisine or location.
+              </p>
+
+            </div>
+
+          </div>
+
+          {/* SEARCH */}
+
+          <div className="dashboard-search-box">
+
+            <FaSearch />
+
+            <input
+              type="text"
+              placeholder="Search restaurants, cuisine, location..."
+              value={search}
+              onChange={(event) =>
+                setSearch(
+                  event.target.value
+                )
+              }
+            />
+
+          </div>
+
+          {/* FILTERS */}
+
+          <div className="dashboard-filters">
+
+            {/* CUISINE */}
+
+            <div className="dashboard-filter">
+
+              <label>
+                Cuisine
+              </label>
+
+              <select
+                value={cuisine}
+                onChange={(event) =>
+                  setCuisine(
+                    event.target.value
+                  )
+                }
+              >
+
+                {cuisineOptions.map(
+                  (item) => (
+                    <option
+                      key={item}
+                      value={item}
+                    >
+                      {item}
+                    </option>
+                  )
+                )}
+
+              </select>
+
+            </div>
+
+            {/* LOCATION */}
+
+            <div className="dashboard-filter">
+
+              <label>
+                Location
+              </label>
+
+              <select
+                value={location}
+                onChange={(event) =>
+                  setLocation(
+                    event.target.value
+                  )
+                }
+              >
+
+                {locationOptions.map(
+                  (item) => (
+                    <option
+                      key={item}
+                      value={item}
+                    >
+                      {item}
+                    </option>
+                  )
+                )}
+
+              </select>
+
+            </div>
+
+            {/* RATING */}
+
+            <div className="dashboard-filter">
+
+              <label>
+                Minimum Rating
+              </label>
+
+              <select
+                value={minimumRating}
+                onChange={(event) =>
+                  setMinimumRating(
+                    event.target.value
+                  )
+                }
+              >
+
+                <option value="All">
+                  All Ratings
+                </option>
+
+                <option value="3">
+                  3+
+                </option>
+
+                <option value="4">
+                  4+
+                </option>
+
+                <option value="4.5">
+                  4.5+
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* =================================================
+            NEARBY
+        ================================================= */}
+
+        <section className="dashboard-restaurant-section">
+
+          <div className="dashboard-section-title">
+
+            <div>
+
+              <span className="dashboard-small-label">
+
+                <FaMapMarkerAlt />
+
+                Nearby
+
+              </span>
+
+              <h2>
+                Restaurants Around You
+              </h2>
+
+              <p>
+                Discover restaurants
+                available in your area.
+              </p>
+
+            </div>
+
+            <Link
+              to="/restaurants"
+              className="dashboard-see-all"
+            >
+
+              See All
+
+              <FaArrowRight />
+
+            </Link>
+
+          </div>
+
+          {loading ? (
+
+            <div className="dashboard-message">
+              Loading restaurants...
+            </div>
+
+          ) : error ? (
+
+            <div className="dashboard-message">
+              {error}
+            </div>
+
+          ) : nearbyRestaurants.length ===
+            0 ? (
+
+            <div className="dashboard-message">
+              No restaurants found.
+            </div>
+
+          ) : (
+
+            <div className="dashboard-restaurant-grid">
+
+              {nearbyRestaurants.map(
+                (restaurant) => (
+                  <RestaurantCard
+                    key={restaurant.id}
+                    restaurant={
+                      restaurant
+                    }
+                  />
+                )
+              )}
+
+            </div>
+
+          )}
+
+        </section>
+
+        {/* =================================================
+            TRENDING
+        ================================================= */}
+
+        <section className="dashboard-restaurant-section">
+
+          <div className="dashboard-section-title">
+
+            <div>
+
+              <span className="dashboard-small-label">
+
+                <FaFire />
+
+                Trending
+
+              </span>
+
+              <h2>
+                Most Popular in Your City
+              </h2>
+
+              <p>
+                Restaurants with the
+                highest ratings.
+              </p>
+
+            </div>
+
+          </div>
+
+          <div className="dashboard-restaurant-grid">
+
+            {trendingRestaurants.map(
+              (restaurant) => (
+                <RestaurantCard
+                  key={restaurant.id}
+                  restaurant={
+                    restaurant
+                  }
+                />
+              )
+            )}
+
+          </div>
+
+        </section>
+
+        {/* =================================================
+            SMART RECOMMENDATIONS
+        ================================================= */}
+
+        <section className="dashboard-smart-section">
+
+          <div className="dashboard-smart-icon">
+            <FaCompass />
+          </div>
+
+          <span className="dashboard-small-label">
+            Smart ZestHub
+          </span>
+
+          <h2>
+            Recommended For You
+          </h2>
 
           <p>
-            Discover amazing food and restaurants
-            around you.
+            Personalized restaurant
+            recommendations based on your
+            preferences, ratings and
+            activity will appear here.
           </p>
-        </div>
 
-        <button
-          className="dashboard-profile-button"
-          onClick={() => navigate("/profile")}
-        >
-          ?? Profile
-        </button>
-      </div>
-
-      {/* ======================================
-          QUICK ACTIONS
-      ====================================== */}
-
-      <div className="dashboard-feature-grid">
-        <div
-          className="dashboard-feature-card clickable"
-          onClick={() => navigate("/profile")}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(event) => {
-            if (
-              event.key === "Enter" ||
-              event.key === " "
-            ) {
-              navigate("/profile");
-            }
-          }}
-        >
-          <div className="feature-icon">??</div>
-
-          <h3>Favorites</h3>
-
-          <p>Your saved restaurants</p>
-
-          <span className="feature-arrow">
-            View Favorites ?
+          <span className="dashboard-coming-soon">
+            Coming Soon
           </span>
-        </div>
 
-        <div
-          className="dashboard-feature-card clickable"
-          onClick={() =>
-            document
-              .getElementById("community-section")
-              ?.scrollIntoView({
-                behavior: "smooth",
-              })
-          }
-        >
-          <div className="feature-icon">??</div>
+        </section>
 
-          <h3>Community</h3>
+        {/* =================================================
+            COMMUNITY
+        ================================================= */}
 
-          <p>See what food lovers are saying</p>
+        <section className="dashboard-community">
 
-          <span className="feature-arrow">
-            Explore Community ?
+          <div className="dashboard-community-icon">
+            <FaComments />
+          </div>
+
+          <span className="dashboard-small-label">
+            ZestHub Community
           </span>
-        </div>
 
-        <div
-          className="dashboard-feature-card clickable"
-          onClick={() =>
-            document
-              .getElementById("popular-section")
-              ?.scrollIntoView({
-                behavior: "smooth",
-              })
-          }
-        >
-          <div className="feature-icon">??</div>
+          <h2>
+            Food Lovers Community
+          </h2>
 
-          <h3>Popular</h3>
+          <p>
+            Share experiences, ratings
+            and reviews.
+          </p>
 
-          <p>Most famous restaurants</p>
+          <div className="dashboard-community-box">
 
-          <span className="feature-arrow">
-            Explore Popular ?
-          </span>
-        </div>
-      </div>
+            <FaComments />
 
-      {/* ======================================
-          SEARCH
-      ====================================== */}
-
-      <section className="dashboard-search-section">
-        <div className="dashboard-section-title">
-          <div>
-            <span className="section-label">
-              ?? Discover
-            </span>
-
-            <h2>
-              Find Your Perfect Restaurant
-            </h2>
-
-            <p>
-              Search by restaurant, cuisine or location.
-            </p>
-          </div>
-        </div>
-
-        <div className="dashboard-search-box">
-          <span>??</span>
-
-          <input
-            type="text"
-            placeholder="Search restaurants, cuisine, location..."
-            value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
-            }
-          />
-
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              className="clear-search"
-              type="button"
-            >
-              ?
-            </button>
-          )}
-        </div>
-      </section>
-
-      {/* ======================================
-          FILTERS
-      ====================================== */}
-
-      <section className="dashboard-filter-section">
-        <div className="filter-group">
-          <label htmlFor="cuisine-filter">
-            Cuisine
-          </label>
-
-          <select
-            id="cuisine-filter"
-            value={selectedCuisine}
-            onChange={(event) =>
-              setSelectedCuisine(event.target.value)
-            }
-          >
-            {cuisines.map((cuisine) => (
-              <option
-                key={cuisine}
-                value={cuisine}
-              >
-                {cuisine}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <label htmlFor="location-filter">
-            Location
-          </label>
-
-          <select
-            id="location-filter"
-            value={selectedLocation}
-            onChange={(event) =>
-              setSelectedLocation(event.target.value)
-            }
-          >
-            {locations.map((location) => (
-              <option
-                key={location}
-                value={location}
-              >
-                {location}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <label htmlFor="rating-filter">
-            Minimum Rating
-          </label>
-
-          <select
-            id="rating-filter"
-            value={minimumRating}
-            onChange={(event) =>
-              setMinimumRating(
-                Number(event.target.value)
-              )
-            }
-          >
-            <option value="0">All Ratings</option>
-            <option value="3">? 3+</option>
-            <option value="4">? 4+</option>
-            <option value="4.5">? 4.5+</option>
-          </select>
-        </div>
-
-        {hasFilters && (
-          <button
-            className="clear-filters-button"
-            onClick={clearFilters}
-            type="button"
-          >
-            Clear Filters
-          </button>
-        )}
-      </section>
-
-      {/* ======================================
-          NEARBY RESTAURANTS
-      ====================================== */}
-
-      <section className="dashboard-restaurant-section">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="section-label">
-              ?? Nearby
-            </span>
-
-            <h2>
-              Restaurants Around You
-            </h2>
-
-            <p>
-              Discover restaurants available in your area.
-            </p>
-          </div>
-
-          <button
-            className="see-all-button"
-            onClick={() =>
-              navigate("/restaurants")
-            }
-          >
-            See All ?
-          </button>
-        </div>
-
-        {nearbyRestaurants.length === 0 ? (
-          <div className="empty-dashboard-state">
-            <div>??</div>
-
-            <h3>No restaurants found</h3>
-
-            <p>
-              Try changing your search or filters.
-            </p>
-
-            {hasFilters && (
-              <button
-                onClick={clearFilters}
-                type="button"
-              >
-                Clear Filters
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="dashboard-restaurant-grid">
-            {nearbyRestaurants.map(
-              (restaurant) => (
-                <RestaurantCard
-                  key={restaurant.id}
-                  restaurant={restaurant}
-                />
-              )
-            )}
-          </div>
-        )}
-      </section>
-
-      {/* ======================================
-          POPULAR
-      ====================================== */}
-
-      <section
-        className="dashboard-restaurant-section"
-        id="popular-section"
-      >
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="section-label">
-              ?? Trending
-            </span>
-
-            <h2>
-              Most Popular in Your City
-            </h2>
-
-            <p>
-              Restaurants with the highest ratings.
-            </p>
-          </div>
-        </div>
-
-        <div className="dashboard-restaurant-grid">
-          {popularRestaurants.length === 0 ? (
-            <div className="empty-dashboard-state">
-              <div>???</div>
-
-              <h3>
-                No popular restaurants yet
-              </h3>
-            </div>
-          ) : (
-            popularRestaurants.map(
-              (restaurant) => (
-                <RestaurantCard
-                  key={restaurant.id}
-                  restaurant={restaurant}
-                />
-              )
-            )
-          )}
-        </div>
-      </section>
-
-      {/* ======================================
-          RECOMMENDED
-      ====================================== */}
-
-      <section className="recommended-section">
-        <div className="recommended-content">
-          <div className="recommended-icon">
-            ?
-          </div>
-
-          <div>
-            <span className="section-label">
-              ? Smart ZestHub
-            </span>
-
-            <h2>
-              Recommended For You
-            </h2>
-
-            <p>
-              Personalized restaurant recommendations
-              based on your preferences, ratings and activity
-              will appear here.
-            </p>
-          </div>
-        </div>
-
-        <span className="coming-soon-badge">
-          Coming Soon
-        </span>
-      </section>
-
-      {/* ======================================
-          COMMUNITY
-      ====================================== */}
-
-      <section
-        className="community-dashboard-section"
-        id="community-section"
-      >
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="section-label">
-              ?? ZestHub Community
-            </span>
-
-            <h2>
-              Food Lovers Community
-            </h2>
-
-            <p>
-              Share experiences, ratings and reviews.
-            </p>
-          </div>
-        </div>
-
-        <div className="community-dashboard-card">
-          <div className="community-big-icon">
-            ??
-          </div>
-
-          <div>
             <h3>
               Your voice matters!
             </h3>
 
             <p>
-              Rate restaurants and write reviews to
-              help other ZestHub users discover great food.
+              Rate restaurants and write
+              reviews to help other
+              ZestHub users discover great
+              food.
             </p>
+
+            <Link to="/restaurants">
+
+              Explore Restaurants
+
+              <FaArrowRight />
+
+            </Link>
+
           </div>
 
-          <button
-            onClick={() =>
-              navigate("/restaurants")
-            }
-          >
-            Explore Restaurants
-          </button>
-        </div>
-      </section>
+        </section>
+
+      </main>
+
     </div>
   );
 }

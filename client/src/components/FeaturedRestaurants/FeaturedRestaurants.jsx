@@ -1,160 +1,197 @@
 import API_URL from "../../config";
 import "./FeaturedRestaurants.css";
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import pizza from "../../assets/images/pizza.jpg";
-import restaurant1 from "../../assets/images/restaurant1.jpg";
-import restaurant2 from "../../assets/images/restaurant2.jpg";
-import restaurant3 from "../../assets/images/restaurant3.jpg";
-import cafe from "../../assets/images/cafe.jpg";
-import biryani from "../../assets/images/biryani.jpg";
-import burger from "../../assets/images/burger.jpg";
+import {
+  FaStar,
+  FaMapMarkerAlt,
+  FaUtensils,
+  FaArrowRight,
+} from "react-icons/fa";
+
+import {
+  getRestaurantImage,
+  FALLBACK_RESTAURANT_IMAGE,
+} from "../../utils/restaurantImage";
 
 function FeaturedRestaurants() {
   const navigate = useNavigate();
 
   const [restaurants, setRestaurants] = useState([]);
+
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState("");
 
-  // Existing local restaurant images
-  const imageMap = {
-    "bella-italia.jpg": restaurant1,
-    "trichy-kitchen.jpg": restaurant2,
-    "barbeque-nation.jpg": restaurant3,
-    "chinese-wok.jpg": restaurant1,
-    "parashy-cafe.jpg": cafe,
-    "hotel-kannappa.jpg": restaurant2,
-    "kms-hakkim.jpg": restaurant3,
-    "gorets-cafe.jpg": cafe,
-    "cascade-cafe.jpg": cafe,
-    "suvai-briyani.jpg": biryani,
-    "grill-chicken.jpg": burger,
-  };
-
-  // Convert backend image path into complete URL
-  const getRestaurantImage = (image) => {
-    // No image
-    if (!image) {
-      return pizza;
-    }
-
-    // Image uploaded through FastAPI
-    if (image.startsWith("/uploads/")) {
-      return `${API_URL}${image}`;
-    }
-
-    // Existing local image
-    return imageMap[image] || pizza;
-  };
-
-  // Fetch restaurants
   useEffect(() => {
-    fetch("${API_URL}/api/restaurants/")
-      .then((response) => {
+    const loadRestaurants = async () => {
+      try {
+        const response = await fetch(
+          `${API_URL}/api/restaurants/`
+        );
+
         if (!response.ok) {
-          throw new Error("Failed to fetch restaurants");
+          throw new Error(
+            "Failed to fetch restaurants"
+          );
         }
 
-        return response.json();
-      })
-      .then((data) => {
-        setRestaurants(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Restaurant fetch error:", error);
+        const data = await response.json();
 
-        setError("Unable to load restaurants");
+        setRestaurants(
+          Array.isArray(data)
+            ? data.slice(0, 6)
+            : []
+        );
+      } catch (err) {
+        console.error(
+          "Restaurant fetch error:",
+          err
+        );
+
+        setError(
+          "Unable to load restaurants."
+        );
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    loadRestaurants();
   }, []);
 
   return (
     <section className="featured">
 
-      {/* Header */}
       <div className="featured-header">
-        <h2>Featured Restaurants</h2>
+
+        <h2>
+          Featured Restaurants
+        </h2>
 
         <p>
-          Discover popular restaurants loved by food enthusiasts
+          Discover popular restaurants loved by
+          food enthusiasts.
         </p>
+
       </div>
 
-      {/* Loading */}
       {loading && (
-        <p style={{ textAlign: "center" }}>
+        <p
+          style={{
+            textAlign: "center",
+          }}
+        >
           Loading restaurants...
         </p>
       )}
 
-      {/* Error */}
       {error && (
         <p
           style={{
             textAlign: "center",
-            color: "red",
           }}
         >
           {error}
         </p>
       )}
 
-      {/* Restaurant Cards */}
-      {!loading && !error && (
-        <div className="restaurant-container">
+      {!loading &&
+        !error &&
+        restaurants.length > 0 && (
 
-          {restaurants.map((restaurant) => (
-            <div
-              className="restaurant-card"
-              key={restaurant.id}
-            >
+          <div className="restaurant-container">
 
-              {/* Restaurant Image */}
-              <img
-                src={getRestaurantImage(restaurant.image)}
-                alt={restaurant.name}
-              />
+            {restaurants.map(
+              (restaurant) => {
 
-              {/* Restaurant Information */}
-              <div className="restaurant-info">
+                const rating = Number(
+                  restaurant.average_rating ??
+                    restaurant.rating ??
+                    0
+                );
 
-                <h3>
-                  {restaurant.name}
-                </h3>
+                return (
+                  <div
+                    className="restaurant-card"
+                    key={restaurant.id}
+                  >
 
-                <div className="rating">
-                  ⭐ {restaurant.average_rating ?? restaurant.rating}
-                </div>
+                    {/* IMAGE */}
 
-                <p>
-                  📍 {restaurant.location}
-                </p>
+                    <div className="restaurant-image-wrapper">
 
-                <p>
-                  🍽️ {restaurant.cuisine}
-                </p>
+                      <img
+                        src={getRestaurantImage(
+                          restaurant.image
+                        )}
+                        alt={restaurant.name}
+                        onError={(event) => {
+                          event.currentTarget.onerror =
+                            null;
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate(
-                      `/restaurant/${restaurant.id}`
-                    )
-                  }
-                >
-                  View Details
-                </button>
+                          event.currentTarget.src =
+                            FALLBACK_RESTAURANT_IMAGE;
+                        }}
+                      />
 
-              </div>
+                    </div>
 
-            </div>
-          ))}
+                    {/* INFO */}
 
-        </div>
-      )}
+                    <div className="restaurant-info">
+
+                      <h3>
+                        {restaurant.name}
+                      </h3>
+
+                      <div className="rating">
+
+                        <FaStar />
+
+                        <span>
+                          {rating > 0
+                            ? rating.toFixed(1)
+                            : "New"}
+                        </span>
+
+                      </div>
+
+                      <p>
+                        <FaMapMarkerAlt />
+                        {restaurant.location ||
+                          "Location unavailable"}
+                      </p>
+
+                      <p>
+                        <FaUtensils />
+                        {restaurant.cuisine ||
+                          "Restaurant"}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(
+                            `/restaurant/${restaurant.id}`
+                          )
+                        }
+                      >
+                        View Details
+                        <FaArrowRight />
+                      </button>
+
+                    </div>
+
+                  </div>
+                );
+              }
+            )}
+
+          </div>
+        )}
 
     </section>
   );
