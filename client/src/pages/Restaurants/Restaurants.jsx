@@ -21,6 +21,10 @@ function Restaurants() {
   const [restaurants, setRestaurants] = useState([]);
   const [search, setSearch] = useState("");
 
+  const [activeFilter, setActiveFilter] = useState("all");
+
+  const [reviewCounts, setReviewCounts] = useState({});
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -28,7 +32,7 @@ function Restaurants() {
 
   /*
   |--------------------------------------------------------------------------
-  | Fetch restaurants from FastAPI
+  | Fetch restaurants
   |--------------------------------------------------------------------------
   */
 
@@ -50,6 +54,8 @@ function Restaurants() {
 
         if (Array.isArray(data)) {
           setRestaurants(data);
+        } else if (Array.isArray(data.value)) {
+          setRestaurants(data.value);
         } else {
           setRestaurants([]);
         }
@@ -67,33 +73,51 @@ function Restaurants() {
 
   /*
   |--------------------------------------------------------------------------
-  | Search restaurants
+  | Fetch review counts
   |--------------------------------------------------------------------------
   */
 
-  const filteredRestaurants = restaurants.filter((restaurant) => {
-    const searchText = search.trim().toLowerCase();
-
-    // Show everything when search is empty
-    if (!searchText) {
-      return true;
+  useEffect(() => {
+    if (!restaurants.length) {
+      return;
     }
 
-    const name =
-      restaurant.name?.toLowerCase() || "";
+    const fetchReviewCounts = async () => {
+      const counts = {};
 
-    const cuisine =
-      restaurant.cuisine?.toLowerCase() || "";
+      await Promise.all(
+        restaurants.map(async (restaurant) => {
+          try {
+            const response = await fetch(
+              `${API_URL}/api/reviews/restaurant/${restaurant.id}`
+            );
 
-    const location =
-      restaurant.location?.toLowerCase() || "";
+            if (!response.ok) {
+              counts[restaurant.id] = 0;
+              return;
+            }
 
-    return (
-      name.includes(searchText) ||
-      cuisine.includes(searchText) ||
-      location.includes(searchText)
-    );
-  });
+            const data = await response.json();
+
+            counts[restaurant.id] = Array.isArray(data)
+              ? data.length
+              : 0;
+          } catch (err) {
+            console.error(
+              `Review count error for restaurant ${restaurant.id}:`,
+              err
+            );
+
+            counts[restaurant.id] = 0;
+          }
+        })
+      );
+
+      setReviewCounts(counts);
+    };
+
+    fetchReviewCounts();
+  }, [restaurants]);
 
   /*
   |--------------------------------------------------------------------------
@@ -101,7 +125,7 @@ function Restaurants() {
   |--------------------------------------------------------------------------
   */
 
-  const getRating = (restaurant) => {
+  const getNumericRating = (restaurant) => {
     const rating =
       restaurant.average_rating ??
       restaurant.rating ??
@@ -110,11 +134,118 @@ function Restaurants() {
     const numericRating = Number(rating);
 
     if (!Number.isFinite(numericRating)) {
-      return "0.0";
+      return 0;
     }
 
-    return numericRating.toFixed(1);
+    return numericRating;
   };
+
+  const getRating = (restaurant) => {
+    return getNumericRating(restaurant).toFixed(1);
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Get review count
+  |--------------------------------------------------------------------------
+  */
+
+  const getReviewCount = (restaurant) => {
+    return reviewCounts[restaurant.id] ?? 0;
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Search
+  |--------------------------------------------------------------------------
+  */
+
+  const searchRestaurants = (restaurantList) => {
+    const searchText = search.trim().toLowerCase();
+
+    if (!searchText) {
+      return restaurantList;
+    }
+
+    return restaurantList.filter((restaurant) => {
+      const name =
+        restaurant.name?.toLowerCase() || "";
+
+      const cuisine =
+        restaurant.cuisine?.toLowerCase() || "";
+
+      const location =
+        restaurant.location?.toLowerCase() || "";
+
+      return (
+        name.includes(searchText) ||
+        cuisine.includes(searchText) ||
+        location.includes(searchText)
+      );
+    });
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Apply active filter
+  |--------------------------------------------------------------------------
+  */
+
+  const applyFilter = (restaurantList) => {
+    const filtered = [...restaurantList];
+
+    if (activeFilter === "top-rated") {
+      return filtered.sort((a, b) => {
+        return (
+          getNumericRating(b) -
+          getNumericRating(a)
+        );
+      });
+    }
+
+    if (activeFilter === "most-reviewed") {
+      return filtered.sort((a, b) => {
+        const reviewDifference =
+          getReviewCount(b) -
+          getReviewCount(a);
+
+        if (reviewDifference !== 0) {
+          return reviewDifference;
+        }
+
+        return (
+          getNumericRating(b) -
+          getNumericRating(a)
+        );
+      });
+    }
+
+    if (activeFilter === "trending") {
+      return filtered.sort((a, b) => {
+        const scoreA =
+          getNumericRating(a) +
+          getReviewCount(a) * 0.5;
+
+        const scoreB =
+          getNumericRating(b) +
+          getReviewCount(b) * 0.5;
+
+        return scoreB - scoreA;
+      });
+    }
+
+    return filtered;
+  };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Search + filter
+  |--------------------------------------------------------------------------
+  */
+
+  const filteredRestaurants = applyFilter(
+    searchRestaurants(restaurants)
+  );
 
   /*
   |--------------------------------------------------------------------------
@@ -123,7 +254,10 @@ function Restaurants() {
   */
 
   const getCuisine = (restaurant) => {
-    return restaurant.cuisine || "Various cuisines";
+    return (
+      restaurant.cuisine ||
+      "Various cuisines"
+    );
   };
 
   /*
@@ -133,7 +267,10 @@ function Restaurants() {
   */
 
   const getLocation = (restaurant) => {
-    return restaurant.location || "Location unavailable";
+    return (
+      restaurant.location ||
+      "Location unavailable"
+    );
   };
 
   /*
@@ -146,6 +283,16 @@ function Restaurants() {
     navigate(`/restaurant/${restaurantId}`);
   };
 
+  /*
+  |--------------------------------------------------------------------------
+  | Change filter
+  |--------------------------------------------------------------------------
+  */
+
+  const changeFilter = (filter) => {
+    setActiveFilter(filter);
+  };
+
   return (
     <section className="restaurants-page">
 
@@ -156,6 +303,7 @@ function Restaurants() {
       <div className="restaurants-header">
 
         <div>
+
           <h1>
             Discover Restaurants
           </h1>
@@ -163,6 +311,7 @@ function Restaurants() {
           <p>
             Find the best places to eat, explore and share your experience.
           </p>
+
         </div>
 
       </div>
@@ -178,7 +327,9 @@ function Restaurants() {
           type="text"
           placeholder="Search restaurants, cuisines or locations..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
         />
 
         <button type="button">
@@ -196,20 +347,57 @@ function Restaurants() {
 
         <button
           type="button"
-          className="active"
+          className={
+            activeFilter === "all"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            changeFilter("all")
+          }
         >
           All
         </button>
 
-        <button type="button">
+        <button
+          type="button"
+          className={
+            activeFilter === "top-rated"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            changeFilter("top-rated")
+          }
+        >
           Top Rated
         </button>
 
-        <button type="button">
+        <button
+          type="button"
+          className={
+            activeFilter === "most-reviewed"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            changeFilter("most-reviewed")
+          }
+        >
           Most Reviewed
         </button>
 
-        <button type="button">
+        <button
+          type="button"
+          className={
+            activeFilter === "trending"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            changeFilter("trending")
+          }
+        >
           Trending
         </button>
 
@@ -245,9 +433,11 @@ function Restaurants() {
       {!loading &&
         !error &&
         filteredRestaurants.length === 0 && (
+
           <div className="restaurant-message">
             No restaurants found.
           </div>
+
         )}
 
 
@@ -261,144 +451,143 @@ function Restaurants() {
 
           <div className="restaurants-grid">
 
-            {filteredRestaurants.map((restaurant) => {
+            {filteredRestaurants.map(
+              (restaurant) => {
 
-              const image = getRestaurantImage(
-                restaurant.image
-              );
+                const image =
+                  getRestaurantImage(
+                    restaurant.image
+                  );
 
-              const rating = getRating(
-                restaurant
-              );
+                const rating =
+                  getRating(restaurant);
 
-              return (
+                return (
 
-                <article
-                  className="restaurant-card"
-                  key={restaurant.id}
-                >
+                  <article
+                    className="restaurant-card"
+                    key={restaurant.id}
+                  >
 
-                  {/* =================================================
-                      IMAGE
-                  ================================================= */}
+                    {/* =================================================
+                        IMAGE
+                    ================================================= */}
 
-                  <div className="restaurant-card-image">
+                    <div className="restaurant-card-image">
 
-                    <img
-                      src={image}
-                      alt={
-                        restaurant.name ||
-                        "Restaurant"
-                      }
-
-                      onError={(event) => {
-                        /*
-                        Prevent infinite image-error loop.
-                        */
-
-                        if (
-                          event.currentTarget.src !==
-                          FALLBACK_RESTAURANT_IMAGE
-                        ) {
-                          event.currentTarget.src =
-                            FALLBACK_RESTAURANT_IMAGE;
+                      <img
+                        src={image}
+                        alt={
+                          restaurant.name ||
+                          "Restaurant"
                         }
-                      }}
-                    />
+
+                        onError={(event) => {
+
+                          if (
+                            event.currentTarget.src !==
+                            FALLBACK_RESTAURANT_IMAGE
+                          ) {
+
+                            event.currentTarget.src =
+                              FALLBACK_RESTAURANT_IMAGE;
+
+                          }
+
+                        }}
+                      />
 
 
-                    {/* =============================================
-                        RATING
-                    ============================================= */}
+                      {/* =============================================
+                          RATING
+                      ============================================= */}
 
-                    <div className="restaurant-rating">
+                      <div className="restaurant-rating">
 
-                      <FaStar />
+                        <FaStar />
 
-                      <span>
-                        {rating}
-                      </span>
+                        <span>
+                          {rating}
+                        </span>
 
-                    </div>
-
-                  </div>
-
-
-                  {/* =================================================
-                      RESTAURANT CONTENT
-                  ================================================= */}
-
-                  <div className="restaurant-card-content">
-
-                    {/* Restaurant name */}
-
-                    <h2>
-                      {restaurant.name ||
-                        "Restaurant"}
-                    </h2>
-
-
-                    {/* Cuisine */}
-
-                    <div className="restaurant-detail">
-
-                      <FaUtensils />
-
-                      <span>
-                        {getCuisine(
-                          restaurant
-                        )}
-                      </span>
-
-                    </div>
-
-
-                    {/* Location */}
-
-                    <div className="restaurant-detail">
-
-                      <FaMapMarkerAlt />
-
-                      <span>
-                        {getLocation(
-                          restaurant
-                        )}
-                      </span>
+                      </div>
 
                     </div>
 
 
                     {/* =================================================
-                        VIEW RESTAURANT
+                        RESTAURANT CONTENT
                     ================================================= */}
 
-                    <button
-                      type="button"
-                      className="view-restaurant-button"
+                    <div className="restaurant-card-content">
 
-                      onClick={() =>
-                        openRestaurant(
-                          restaurant.id
-                        )
-                      }
-                    >
+                      <h2>
+                        {restaurant.name ||
+                          "Restaurant"}
+                      </h2>
 
-                      <span>
-                        View Restaurant
-                      </span>
 
-                      <FaArrowRight />
+                      {/* Cuisine */}
 
-                    </button>
+                      <div className="restaurant-detail">
 
-                  </div>
+                        <FaUtensils />
 
-                </article>
+                        <span>
+                          {getCuisine(
+                            restaurant
+                          )}
+                        </span>
 
-              );
-            })}
+                      </div>
+
+
+                      {/* Location */}
+
+                      <div className="restaurant-detail">
+
+                        <FaMapMarkerAlt />
+
+                        <span>
+                          {getLocation(
+                            restaurant
+                          )}
+                        </span>
+
+                      </div>
+
+
+                      {/* View Restaurant */}
+
+                      <button
+                        type="button"
+                        className="view-restaurant-button"
+
+                        onClick={() =>
+                          openRestaurant(
+                            restaurant.id
+                          )
+                        }
+                      >
+
+                        <span>
+                          View Restaurant
+                        </span>
+
+                        <FaArrowRight />
+
+                      </button>
+
+                    </div>
+
+                  </article>
+
+                );
+              }
+            )}
 
           </div>
+
         )}
 
     </section>
