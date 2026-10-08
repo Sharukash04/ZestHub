@@ -8,9 +8,15 @@ from fastapi import (
 )
 
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.database import get_db
-from app.models import Restaurant, Category, User
+from app.models import (
+    Restaurant,
+    Category,
+    User,
+    Review,
+)
 from app.auth import get_current_user, require_admin_or_owner
 
 from pathlib import Path
@@ -67,7 +73,10 @@ def save_restaurant_image(image: UploadFile) -> str:
 # Restaurant response helper
 # ---------------------------------------------------------
 
-def restaurant_response(restaurant: Restaurant):
+def restaurant_response(
+    restaurant: Restaurant,
+    review_count: int = 0,
+):
     return {
         "id": restaurant.id,
         "name": restaurant.name,
@@ -75,6 +84,7 @@ def restaurant_response(restaurant: Restaurant):
         "cuisine": restaurant.cuisine,
         "rating": restaurant.average_rating,
         "average_rating": restaurant.average_rating,
+        "review_count": review_count,
         "description": restaurant.description,
         "image": restaurant.image,
         "category_id": restaurant.category_id,
@@ -125,11 +135,25 @@ def check_restaurant_permission(
 def get_restaurants(
     db: Session = Depends(get_db),
 ):
-    restaurants = db.query(Restaurant).all()
+    results = (
+        db.query(
+            Restaurant,
+            func.count(Review.id).label("review_count"),
+        )
+        .outerjoin(
+            Review,
+            Review.restaurant_id == Restaurant.id,
+        )
+        .group_by(Restaurant.id)
+        .all()
+    )
 
     return [
-        restaurant_response(restaurant)
-        for restaurant in restaurants
+        restaurant_response(
+            restaurant,
+            review_count,
+        )
+        for restaurant, review_count in results
     ]
 
 
@@ -143,19 +167,32 @@ def get_restaurant(
     restaurant_id: int,
     db: Session = Depends(get_db),
 ):
-    restaurant = (
-        db.query(Restaurant)
+    result = (
+        db.query(
+            Restaurant,
+            func.count(Review.id).label("review_count"),
+        )
+        .outerjoin(
+            Review,
+            Review.restaurant_id == Restaurant.id,
+        )
         .filter(Restaurant.id == restaurant_id)
+        .group_by(Restaurant.id)
         .first()
     )
 
-    if not restaurant:
+    if not result:
         raise HTTPException(
             status_code=404,
             detail="Restaurant not found",
         )
 
-    return restaurant_response(restaurant)
+    restaurant, review_count = result
+
+    return restaurant_response(
+        restaurant,
+        review_count,
+    )
 
 
 # ---------------------------------------------------------
@@ -281,7 +318,10 @@ def create_restaurant(
 
     return {
         "message": "Restaurant created successfully",
-        "restaurant": restaurant_response(restaurant),
+        "restaurant": restaurant_response(
+            restaurant,
+            0,
+        ),
     }
 
 
@@ -413,9 +453,22 @@ def update_restaurant(
     db.commit()
     db.refresh(restaurant)
 
+    # ---------------------------------------------
+    # Get current review count
+    # ---------------------------------------------
+
+    review_count = (
+        db.query(func.count(Review.id))
+        .filter(Review.restaurant_id == restaurant.id)
+        .scalar()
+    )
+
     return {
         "message": "Restaurant updated successfully",
-        "restaurant": restaurant_response(restaurant),
+        "restaurant": restaurant_response(
+            restaurant,
+            review_count,
+        ),
     }
 
 

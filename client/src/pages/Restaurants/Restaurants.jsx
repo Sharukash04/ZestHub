@@ -23,8 +23,6 @@ function Restaurants() {
 
   const [activeFilter, setActiveFilter] = useState("all");
 
-  const [reviewCounts, setReviewCounts] = useState({});
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -73,54 +71,6 @@ function Restaurants() {
 
   /*
   |--------------------------------------------------------------------------
-  | Fetch review counts
-  |--------------------------------------------------------------------------
-  */
-
-  useEffect(() => {
-    if (!restaurants.length) {
-      return;
-    }
-
-    const fetchReviewCounts = async () => {
-      const counts = {};
-
-      await Promise.all(
-        restaurants.map(async (restaurant) => {
-          try {
-            const response = await fetch(
-              `${API_URL}/api/reviews/restaurant/${restaurant.id}`
-            );
-
-            if (!response.ok) {
-              counts[restaurant.id] = 0;
-              return;
-            }
-
-            const data = await response.json();
-
-            counts[restaurant.id] = Array.isArray(data)
-              ? data.length
-              : 0;
-          } catch (err) {
-            console.error(
-              `Review count error for restaurant ${restaurant.id}:`,
-              err
-            );
-
-            counts[restaurant.id] = 0;
-          }
-        })
-      );
-
-      setReviewCounts(counts);
-    };
-
-    fetchReviewCounts();
-  }, [restaurants]);
-
-  /*
-  |--------------------------------------------------------------------------
   | Get restaurant rating
   |--------------------------------------------------------------------------
   */
@@ -148,10 +98,22 @@ function Restaurants() {
   |--------------------------------------------------------------------------
   | Get review count
   |--------------------------------------------------------------------------
+  |
+  | review_count now comes directly from the backend.
+  | No additional review API request is required.
+  |
   */
 
   const getReviewCount = (restaurant) => {
-    return reviewCounts[restaurant.id] ?? 0;
+    const count = Number(
+      restaurant.review_count ?? 0
+    );
+
+    if (!Number.isFinite(count)) {
+      return 0;
+    }
+
+    return count;
   };
 
   /*
@@ -194,6 +156,12 @@ function Restaurants() {
   const applyFilter = (restaurantList) => {
     const filtered = [...restaurantList];
 
+    /*
+    |----------------------------------------------------------------------
+    | Top Rated
+    |----------------------------------------------------------------------
+    */
+
     if (activeFilter === "top-rated") {
       return filtered.sort((a, b) => {
         return (
@@ -202,6 +170,12 @@ function Restaurants() {
         );
       });
     }
+
+    /*
+    |----------------------------------------------------------------------
+    | Most Reviewed
+    |----------------------------------------------------------------------
+    */
 
     if (activeFilter === "most-reviewed") {
       return filtered.sort((a, b) => {
@@ -220,6 +194,12 @@ function Restaurants() {
       });
     }
 
+    /*
+    |----------------------------------------------------------------------
+    | Trending
+    |----------------------------------------------------------------------
+    */
+
     if (activeFilter === "trending") {
       return filtered.sort((a, b) => {
         const scoreA =
@@ -233,6 +213,12 @@ function Restaurants() {
         return scoreB - scoreA;
       });
     }
+
+    /*
+    |----------------------------------------------------------------------
+    | All
+    |----------------------------------------------------------------------
+    */
 
     return filtered;
   };
