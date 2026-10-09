@@ -1,3 +1,6 @@
+
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -17,7 +20,7 @@ from app.routes.menu_items import router as menu_item_router
 app = FastAPI(
     title="ZestHub API",
     description="Restaurant Discovery and Review Platform API",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 
@@ -25,12 +28,20 @@ app = FastAPI(
 # CORS CONFIGURATION
 # ---------------------------------------------------------
 
+frontend_url = os.getenv(
+    "FRONTEND_URL",
+    "https://zesthub.vercel.app",
+).rstrip("/")
+
+allowed_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    frontend_url,
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -51,7 +62,7 @@ Base.metadata.create_all(bind=engine)
 app.mount(
     "/uploads",
     StaticFiles(directory="uploads"),
-    name="uploads"
+    name="uploads",
 )
 
 
@@ -87,5 +98,5 @@ def home():
 def health_check():
     return {
         "status": "success",
-        "message": "ZestHub backend is running"
+        "message": "ZestHub backend is running",
     }
