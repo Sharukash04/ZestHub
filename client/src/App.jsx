@@ -83,13 +83,27 @@ function App() {
           element={<Profile />}
         />
 
+        {/* Favorites - existing URL */}
         <Route
           path="/favorites"
           element={<Favorites />}
         />
 
+        {/* Reviews - existing URL */}
         <Route
           path="/reviews"
+          element={<MyReviews />}
+        />
+
+        {/* Profile Favorites - Navbar URL */}
+        <Route
+          path="/profile/favorites"
+          element={<Favorites />}
+        />
+
+        {/* Profile Reviews - Navbar URL */}
+        <Route
+          path="/profile/reviews"
           element={<MyReviews />}
         />
 
